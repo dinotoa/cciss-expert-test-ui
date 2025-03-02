@@ -14,7 +14,7 @@ attività del CCISS.
 - [Leaflet](https://leafletjs.com/)
 - [React Markdown](https://github.com/remarkjs/react-markdown)
 - [Remark Gfm](https://github.com/remarkjs/remark-gfm)
-- [Zod](https://zod.dev/]
+- [Zod](https://zod.dev/)]
 
 ## Sviluppo
 
