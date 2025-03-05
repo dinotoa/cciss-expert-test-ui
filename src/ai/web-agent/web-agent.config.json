@@ -9,6 +9,8 @@
     "Scegli tra uno dei seguenti agenti:",
     "- traffic: per le informazioni di traffico;",
     "- traffic: per gli eventi di traffico;",
+    "- traffic: per gli eventi meteo",
+    "- traffic: per concerti e manifestazioni",
     "- bulletin: per il bollettino di traffico relativi a una città",
     "- bulletin: notiziario di traffico di una città",
     "- information: per qualsiasi altra informazione.",

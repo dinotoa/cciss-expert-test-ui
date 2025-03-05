@@ -25,6 +25,7 @@ export function MarkdownPanel({ className, content, ...props }: MarkdownDisplayP
         th: ({ node, ...props }) => <td className="border px-2 py-1 bg-neutral-200 font-bold" {...props} />,
         td: ({ node, ...props }) => <td className="border px-2 py-1" {...props} />,
         table: ({ node, ...props }) => <table className="mb-4" {...props} />,
+        pre: ({ node, ...props }) => <pre className="p-4 mb-4 text-wrap" {...props} />,
         blockquote: ({ node, ...props }) => (
           <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-4" {...props} />
         ),

@@ -3,7 +3,7 @@ import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
 import * as L from "leaflet";
 import { MapContainer, TileLayer, useMap, ZoomControl } from "react-leaflet";
-import { MapRectangle } from "@/lib/geography";
+import { MapRectangle } from "@/lib/location-database/geography";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
 import { Maximize } from "lucide-react";

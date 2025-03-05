@@ -5,6 +5,7 @@ import { logInfo } from '@/lib/logging'
 import { infoAgent } from '../info-agent/info-agent'
 import { AgentEnumZod, WEB_AGENT_NAME } from '../library'
 import config from "./web-agent.config.json"
+import { trafficAgent } from '../traffic-agent/traffic-agent'
 
 const AGENT_NAME = `${WEB_AGENT_NAME}:`
 const TEMPERATURE = config.temperature || 0.0
@@ -30,6 +31,8 @@ export async function mainWebAgent(dataStream: DataStreamWriter, messages: Messa
   })
   logInfo(AGENT_NAME, "selected agent", agentSelection.object.agent)
   switch (agentSelection.object.agent) {
+    case "traffic":
+      return await trafficAgent(dataStream, messages)
     default:
       return await infoAgent(dataStream, messages)
   }
