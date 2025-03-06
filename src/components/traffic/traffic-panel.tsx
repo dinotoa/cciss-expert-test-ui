@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools"
@@ -9,6 +9,7 @@ import { logInfo } from "@/lib/logging";
 import { Button } from "../ui/button";
 import { ZoomIn } from "lucide-react";
 import { TrafficEventType } from "@/lib/traffic-database/traffic-database-types";
+import { Feature, FeatureCollection, Geometry } from "geojson";
 
 interface TrafficPanelProps extends React.HTMLProps<HTMLElement> {
   eventData: TrafficEventToolResponse
@@ -29,7 +30,7 @@ const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, eventDa
   logInfo(eventData)
   return eventData.displayMap && eventData.events ?
     <section id={id} className={cn("w-full h-[30rem] flex flex-row justify-between items-start gap-0", className)}>
-      {/* <EventListPanel className="w-[50%] h-full" events={eventData.events || []} setMapMBR={setMapMBR} /> */}
+      <EventListPanel className="w-[50%] h-full" events={eventData.events || []} setMapMBR={setMapMBR} />
       <MapPanel className="w-[75%] h-full" desiredMBR={mapMBR} setMapMBR={setMapMBR} fullMBR={fullMbr}
         events={eventData.events}
         iconUrl="https://luceverde.it/icons/city-map-pin.svg" />
@@ -37,35 +38,41 @@ const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, eventDa
     : null
 }
 
-// function EventListPanel({ id, className, events, setMapMBR }:
-//   { id?: string, className?: string, events: TrafficEvent[], setMapMBR: (mbr: MapRectangle) => void }) {
-//   return (
-//     <aside id={id} className={cn("flex flex-col h-full w-full items-start border border-neutral-200", className)}>
-//       <ScrollArea className="w-full overflow-auto">
-//         {events && events.map(city => (
-//           <div key={city.id} className="border-b border-neutral-200 hover:bg-neutral-200 p-2">
-//             <TrafficEventCard event={city} setMapMBR={setMapMBR} />
-//           </div>
-//         ))}
-//       </ScrollArea>
-//     </aside>
-//   )
-// }
+interface EventListPanelProps extends React.HTMLProps<HTMLElement> {
+  events: FeatureCollection<Geometry, TrafficEventType>,
+  setMapMBR: (mbr: MapRectangle) => void
+}
+
+const EventListPanel: React.FC<EventListPanelProps> = ({ id, className, events, setMapMBR }) => { 
+  return (
+    <aside id={id} className={cn("flex flex-col h-full w-full items-start border border-neutral-200", className)}>
+      <ScrollArea className="w-full overflow-auto">
+        {events && events.features.map(evt => (
+          <div key={evt.properties.id} className="border-b border-neutral-200 hover:bg-neutral-200 p-2">
+            <TrafficEventCard event={evt} setMapMBR={setMapMBR} />
+          </div>
+        ))}
+      </ScrollArea>
+    </aside>
+  )
+}
 
 interface TrafficEventCardProps {
-  event: TrafficEventType,
+  event: Feature<Geometry, TrafficEventType>
   setMapMBR: (mbr: MapRectangle) => void
 }
 
 export function TrafficEventCard({ event, setMapMBR }: TrafficEventCardProps ) {
+  const bbox = turfBboxToLeafletBounds(turf.bbox(event))
+
   return (
-    <div key={event.id} className="relative flex flex-row justify-between items-center w-full">
+    <div key={event.properties.id} className="relative flex flex-row justify-between items-center w-full">
       <div>
-        <p className="font-bold">{event.road}</p>
-        <p>{event.description}</p>
-        <p>{event.location}</p>
+        <p className="font-bold">{event.properties.road}</p>
+        <p>{event.properties.description}</p>
+        <p>{event.properties.location}</p>
       </div>
-      <Button variant="ghost" >
+      <Button variant="ghost" onClick={() => setMapMBR(bbox)}>
         <ZoomIn />
       </Button>
     </div>
