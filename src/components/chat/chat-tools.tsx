@@ -1,11 +1,21 @@
+import { TRAFFIC_TOOL_NAME } from "@/ai/library"
+import TrafficEventPanel from "../traffic/traffic-panel"
+import { logInfo } from "@/lib/logging"
+import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools"
+import { ToolInvocation } from "ai"
+
 export interface ToolPanelProps extends React.HTMLProps<HTMLElement> {
   response: string
-  toolName?: string
-  toolData: string
+  invocation: ToolInvocation
 }
 
-export const ToolPanel: React.FC<ToolPanelProps> = ({ id, className, toolName, response, toolData }) => {
+export const ToolPanel: React.FC<ToolPanelProps> = ({ id, className, response, invocation }) => {
+  const toolName = invocation.toolName
+  const toolResult = invocation.state === "result" ? invocation.result : null
+  logInfo(toolName, toolResult)
   switch (toolName) {
+    case "trafficEventSelectionTool":
+      return <TrafficEventPanel id={id} className={className} eventData={toolResult as TrafficEventToolResponse} />
     // case "initiativeTool":
     //   return <InitiativesPanel id={id} className={className} initiativeData={toolData as InitiativeToolResponse} />
     // case "trafficEventSelectionTool":

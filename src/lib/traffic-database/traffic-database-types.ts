@@ -24,8 +24,10 @@ export interface TrafficEventType {
   updateDate: string
   source?: string,
   road: string,
+  location: string
   description: string,
   note?: string
+  iconName: string
 }
 
 export interface TrafficDataResponse {

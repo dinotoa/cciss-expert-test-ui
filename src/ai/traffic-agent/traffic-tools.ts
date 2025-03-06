@@ -2,7 +2,7 @@ import { tool as createTool } from 'ai'
 import { z } from 'zod'
 import { MapRectangle } from '@/lib/location-database/geography'
 import { getRegionsByName } from '@/lib/location-database/location-db'
-import { logInfo } from '@/lib/logging'
+import { logErr, logInfo } from '@/lib/logging'
 import { TrafficEventType, ZTopicType, } from "../../lib/traffic-database/traffic-database-types"
 import { TRAFFIC_TOOL_NAME } from '../library'
 import { fetchTrafficDataBySlug } from '../../lib/traffic-database/luceverde-api'
@@ -16,7 +16,6 @@ export interface TrafficEventToolResponse {
   events?: FeatureCollection<Geometry, TrafficEventType>
   numberOfEvents: number
   displayMap: boolean
-  mapMbr?: MapRectangle
 }
 
 const trafficSelectionTool = createTool({
@@ -32,7 +31,7 @@ const trafficSelectionTool = createTool({
     const response = await fetchTrafficInfoByFeatures(topics)
     logInfo(TRAFFIC_TOOL_NAME, "response:", response.data?.features?.length)
     if (response.data) {
-      return { displayMap, events: response.data, numberOfEvents: 0, error: response.error }
+      return { displayMap, events: response.data, numberOfEvents: response.data.features.length, error: response.error }
     }
     // if (response.data && response.cityData) {
     //   const selectedEvents = await selectDataByTopic(response.data, requestedTopic, response.cityData)
@@ -47,6 +46,7 @@ const trafficSelectionTool = createTool({
     //     see_also: `https://${response.cityData?.slug}.luceverde.it/traffico`
     //   }
     // }
+    logErr(TRAFFIC_TOOL_NAME, "error:", response.error)
     return { displayMap, error: response.error, numberOfEvents: 0 }
   }
 })

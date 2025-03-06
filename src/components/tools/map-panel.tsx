@@ -23,7 +23,7 @@ export function createIcon(path: string, size: number) {
   const icon = L.icon({
     iconUrl: path,
     iconSize: [iconSize, iconSize],
-    iconAnchor: [iconSize / 2, iconSize],
+    iconAnchor: [iconSize / 2, iconSize / 2],
     popupAnchor: [0, -iconSize],
   })
   return icon

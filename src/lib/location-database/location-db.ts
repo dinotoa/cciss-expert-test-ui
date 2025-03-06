@@ -26,13 +26,13 @@ export function getLocationsByTypeName(type: z.infer<typeof ZLocationEnum>, name
 }
 
 export function getRegionsByName(name: string): LDbAreaFeature[] {
-  return Object.values(LDbRegions).filter(f => f.properties.name.toLowerCase().includes(name.toLowerCase()))
+  return Object.values(LDbRegions).filter(f => f.properties.name.toLowerCase() === name.toLowerCase())
 }
 
 export function getProvincesByName(name: string): LDbAreaFeature[] {
-  return Object.values(LDbProvinces).filter(f => f.properties.name.toLowerCase().includes(name.toLowerCase()))
+  return Object.values(LDbProvinces).filter(f => f.properties.name.toLowerCase() === name.toLowerCase())
 }
 
 export function getCitiesByName(name: string): LDbAreaFeature[] {
-  return Object.values(LDbCities).filter(f => f.properties.name.toLowerCase().includes(name.toLowerCase()))
+  return Object.values(LDbCities).filter(f => f.properties.name.toLowerCase() === name.toLowerCase())
 }

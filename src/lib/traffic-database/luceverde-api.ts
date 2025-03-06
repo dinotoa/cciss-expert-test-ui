@@ -31,15 +31,15 @@ export async function fetchTrafficDataBySlug(slug: string) {
     if (trafficDataResponse.error) {
         return { error: trafficDataResponse.error.message }
     }
-    const newFeatures = trafficDataResponse?.data?.features.map(mapGeometry)
+    const newFeatures = trafficDataResponse?.data?.features.map(mapFeature)
     return { data: { ...trafficDataResponse.data, features: newFeatures } }
 }
 
-function mapGeometry(feature: Feature<Geometry, LvdEventProps>): Feature<Geometry, TrafficEventType> {
+function mapFeature(feature: Feature<Geometry, LvdEventProps>): Feature<Geometry, TrafficEventType> {
     const geometry: Geometry = feature.geometry.type === "MultiPoint"
         ? {
             type: "LineString",
-            coordinates: feature.geometry.coordinates as Position[]
+            coordinates: feature.geometry.coordinates 
         }
         : feature.geometry
     const properties = {
@@ -49,7 +49,9 @@ function mapGeometry(feature: Feature<Geometry, LvdEventProps>): Feature<Geometr
         source: feature.properties.source,
         road: feature.properties.road,
         description: feature.properties.event.it,
+        location: feature.properties.translation.it,
         note: feature.properties.note?.it,
+        iconName: feature.properties.iconName.toLowerCase(),
     }
-    return { type: "Feature", geometry, properties }
+    return { type: "Feature", geometry: geometry, properties }
 }

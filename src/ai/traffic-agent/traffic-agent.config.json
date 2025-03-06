@@ -13,9 +13,8 @@
     "## Tool",
     "- trafficSelectionTool: seleziona le notizie da inserire nella risposta",
     "## Istruzioni",
-    "- estrai la lista delle {location} dalla domanda",
-    "- estrai il tipo dalla domanda",
     "- invoca il tool per la selezione del traffico per acquisire i dati",
+    "- se è richiesta la mappa rispondi con il numero di eventi presenti",
     "- Usa solo le informazioni dei tool per rispondere, non usare la tua conoscenza"
   ]
 }

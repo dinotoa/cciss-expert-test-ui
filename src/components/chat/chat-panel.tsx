@@ -17,6 +17,7 @@ const ChatPanel: React.FC<React.HTMLProps<HTMLElement>> = ({
       logInfo('Finish reason:', finishReason);
     },
     onError: error => {
+      logInfo('Error streaming message:', error);
       setMessages(messages.slice(0, messages.length))
       toast({ title: 'Error', description: error.message, variant: 'destructive'});
     },

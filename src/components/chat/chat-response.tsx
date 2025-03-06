@@ -6,6 +6,8 @@ import { MarkdownPanel } from "@/components/ui/markdown-panel"
 import { BotMessageSquare, Files, FileX, User, Volume2 } from "lucide-react"
 import { AgentAnnotations, INFO_AGENT_NAME } from "@/ai/library"
 import SpeechSynthesisPlayer from "../tools/tts-player"
+import { ToolPanel } from "./chat-tools"
+import { ToolInvocation, ToolResult, Tool } from "ai"
 
 type ChatMessageProps = React.HTMLProps<HTMLElement> & {
   message: Message
@@ -26,13 +28,14 @@ const ChatResponsePanel: React.FC<ChatMessageProps> = ({ id = "chat-message-pane
             ? <UserPromptPanel prompt={message.content} createdAt={message.createdAt?.toDateString()} />
             : <MarkdownPanel content={message.content} />
           }
-          {/* {message.toolInvocations?.map(invocation => (
-            "result" in invocation ?
-              <ToolPanel key={invocation.toolCallId} className="py-4"
-                response={isLoading ? "" : message.content}
-                toolName={invocation.toolName} toolData={invocation.result} />
+          {message.parts?.map(part => (
+            part.type === "tool-invocation" && (part.toolInvocation as ToolInvocation).state === "result" ?
+              <ToolPanel key={(part.toolInvocation as ToolInvocation).toolCallId} className="py-4" 
+                response={message.content ?? ""} 
+                invocation={part.toolInvocation as ToolInvocation}
+                />
               : null
-          ))} */}
+          ))}
           {message.role !== 'user' && <MessageToolbar message={message} isLoading={isLoading} stop={stop}
             copyMessage={copyMessage}
             deleteMessage={deleteMessage} />
