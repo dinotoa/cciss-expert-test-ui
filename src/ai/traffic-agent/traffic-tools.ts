@@ -1,13 +1,11 @@
 import { tool as createTool } from 'ai'
 import { z } from 'zod'
-import { MapRectangle } from '@/lib/location-database/geography'
-import { getRegionsByName } from '@/lib/location-database/location-db'
 import { logErr, logInfo } from '@/lib/logging'
 import { TrafficEventType, ZTopicType, } from "../../lib/traffic-database/traffic-database-types"
 import { TRAFFIC_TOOL_NAME } from '../library'
-import { fetchTrafficDataBySlug } from '../../lib/traffic-database/luceverde-api'
 import { fetchTrafficInfoByFeatures } from '@/lib/traffic-database/traffic-database'
 import { FeatureCollection, Geometry } from 'geojson'
+import { trafficSelectionAgent } from './traffic-selection-agent'
 
 // import { trafficSelectionAgent } from './traffic-selection-agent'
 
@@ -31,21 +29,17 @@ const trafficSelectionTool = createTool({
     const response = await fetchTrafficInfoByFeatures(topics)
     logInfo(TRAFFIC_TOOL_NAME, "response:", response.data?.features?.length)
     if (response.data) {
+      if (topics.length) {
+        const events = response.data.features.map(event => event.properties)
+        logInfo(TRAFFIC_TOOL_NAME, "sending", events.length, "to selection model")
+        const selectedIdObject = await (await trafficSelectionAgent(topics[0].topic, events))
+        logInfo(TRAFFIC_TOOL_NAME, "selected", selectedIdObject.object.length, "traffic events")
+        const selectedIds = new Set(selectedIdObject.object)
+        response.data.features = response.data.features.filter(event => selectedIds.has(event.properties.id))
+        logInfo(TRAFFIC_TOOL_NAME, "final selection is", response.data.features.length, "traffic events")
+      }
       return { displayMap, events: response.data, numberOfEvents: response.data.features.length, error: response.error }
     }
-    // if (response.data && response.cityData) {
-    //   const selectedEvents = await selectDataByTopic(response.data, requestedTopic, response.cityData)
-    //   const mapMbr = selectedEvents.length > 0 ? selectedEvents
-    //     .reduce((acc, evt) => reduceMBR(acc, evt.mbr), selectedEvents[0].mbr) : response.cityData?.bounding_box
-    //   return {
-    //     city: "roma",
-    //     numberOfEvents: response.data?.length ?? 0,
-    //     events: selectedEvents ?? [],
-    //     displayMap: displayMap ?? false,
-    //     mapMbr: inflateRectangle(mapMbr, .05),
-    //     see_also: `https://${response.cityData?.slug}.luceverde.it/traffico`
-    //   }
-    // }
     logErr(TRAFFIC_TOOL_NAME, "error:", response.error)
     return { displayMap, error: response.error, numberOfEvents: 0 }
   }

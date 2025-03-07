@@ -11,6 +11,7 @@
     "- traffic: per gli eventi di traffico;",
     "- traffic: per gli eventi meteo",
     "- traffic: per concerti e manifestazioni",
+    "- traffic: per divieti, chiusure e ztl",
     "- bulletin: per il bollettino di traffico relativi a una città",
     "- bulletin: notiziario di traffico di una città",
     "- information: per qualsiasi altra informazione.",
