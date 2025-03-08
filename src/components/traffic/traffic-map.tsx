@@ -19,11 +19,11 @@ interface TrafficMapProps extends React.HTMLProps<HTMLElement> {
 }
 
 const TrafficMap: React.FC<TrafficMapProps> = ({ id, className, desiredMBR, fullMBR, setMapMBR, events, iconUrl }) => {
-  return (
+  return events?.features?.length ?
     <MapPanel id={id} className={className} desiredMBR={desiredMBR} fullMBR={fullMBR}>
       <TrafficEventLayer events={events} iconUrl={iconUrl} setMapMBR={setMapMBR} />
     </MapPanel>
-  )
+    :null
 }
 
 const TrafficEventLayer: React.FC<TrafficMapProps> = ({ events: events, setMapMBR }) => {

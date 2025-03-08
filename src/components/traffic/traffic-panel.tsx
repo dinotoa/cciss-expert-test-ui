@@ -28,7 +28,7 @@ const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, eventDa
   const fullMbr = eventData.events ? turfBboxToLeafletBounds(turf.bbox(eventData.events)) : turfBboxToLeafletBounds([8, 40, 12, 45])
   const [mapMBR, setMapMBR] = useState(fullMbr)
   logInfo(eventData)
-  return eventData.displayMap && eventData.events ?
+  return eventData.displayMap && eventData.events?.features.length ?
     <section id={id} className={cn("w-full h-[30rem] flex flex-row justify-between items-start gap-0", className)}>
       <EventListPanel className="w-[50%] h-full" events={eventData.events || []} setMapMBR={setMapMBR} />
       <MapPanel className="w-[75%] h-full" desiredMBR={mapMBR} setMapMBR={setMapMBR} fullMBR={fullMbr}
