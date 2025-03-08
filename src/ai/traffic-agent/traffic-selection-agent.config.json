@@ -1,11 +1,11 @@
 {
   "modelName": "gemini-2.0-flash",
   "temperature": 0.0,
-  "maxSteps": 5,
+  "maxSteps": 1,
   "maxDuration": 60,
   "prompt": [
     "Sei un esperto di traffico e viabilità",
-    "Il tuo compito è di selezionare gli eventi di traffico nella lista {{eventi}} che sono di uno dei tipi nalla lista {{topic}}",
+    "Il tuo compito è di selezionare gli eventi di traffico nella lista {{eventi}} che sono di uno o più tipi nella lista {{topic}}",
     "## Regole",
     "se {{topic}} è 'static' seleziona:",
     "- lavori;",

@@ -3,7 +3,8 @@ import { ZLocationEnum } from "../location-database/location-db-types"
 import { FeatureCollection, Geometry } from "geojson"
 
 export const ZTopicEnum = z.enum([
-  "tutti", "congestioni", "incidenti", "ztl", "divieto", "chiusura", "deviazione", "meteo", "evento sportivo", "manifestazione", "concerto"
+  "tutti", "congestioni", "incidenti", "ztl", "divieto", "lavori", "chiusura", "deviazione", "meteo", 
+  "evento sportivo", "manifestazione", "concerto"
 ]).describe("valori che puà assumere il topic di ricerca")
 export type TopicEnum = z.infer<typeof ZTopicEnum>
 
