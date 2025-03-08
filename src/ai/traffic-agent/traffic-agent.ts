@@ -21,6 +21,7 @@ export async function trafficAgent(dataStream: DataStreamWriter, messages: Messa
     temperature: TEMPERATURE,
     messages,
     tools,
+    toolChoice: 'auto',
     onFinish() {
       dataStream.writeMessageAnnotation({
         agent: TRAFFIC_AGENT_NAME,

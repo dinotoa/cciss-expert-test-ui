@@ -5,7 +5,7 @@
   "maxDuration": 60,
   "prompt": [
     "Sei un esperto di traffico e viabilità",
-    "Il tuo compito è di selezionare gli eventi di traffico nella lista {{eventi}} che sono di tipo {{topic}}",
+    "Il tuo compito è di selezionare gli eventi di traffico nella lista {{eventi}} che sono di uno dei tipi nalla lista {{topic}}",
     "## Regole",
     "se {{topic}} è 'static' seleziona:",
     "- lavori;",

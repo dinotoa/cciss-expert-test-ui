@@ -13,9 +13,9 @@ const SYSTEM_PROMPT = config.prompt?.join("\n") ||
 
 const OUTPUT_FORMAT = z.string().describe("id dell'evento selezionato")
 
-export async function trafficSelectionAgent(topic: TopicEnum, events: TrafficEventType[]) {
+export async function trafficSelectionAgent(topic: TopicEnum[], events: TrafficEventType[]) {
   logInfo(AGENT_NAME, "using", MODEL_NAME, "model with temperature", TEMPERATURE)
-  const prompt = `\n\n{{topic}}: ${topic}\n\n{{events}}:\n` + JSON.stringify(events)
+  const prompt = `\n\n{{topic}}: ${topic.join(",")}\n\n{{events}}:\n` + JSON.stringify(events)
   return generateObject({
     model: google(MODEL_NAME),
     system: SYSTEM_PROMPT,

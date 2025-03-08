@@ -43,7 +43,7 @@ export type LDbAreaFeature = Feature<Geometry, LDbFeatureProps>;
 export type LDbPointFeature = Feature<Geometry, LDbPointProps>;
 export type LDbRoadFeature = Feature<Geometry, LDbRoadProps>;
 
-export const ZLocationEnum = z.enum(["strada", "città", "regione", "provincia"])
+export const ZLocationEnum = z.enum(["strada", "città", "regione", "provincia", "indirizzo"])
   .describe("valori che può assumente il tipo di località")
 export type LocationEnum = z.infer<typeof ZLocationEnum>
 

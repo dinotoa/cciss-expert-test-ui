@@ -32,10 +32,17 @@ const trafficSelectionTool = createTool({
       if (topics.length) {
         const events = response.data.features.map(event => event.properties)
         logInfo(TRAFFIC_TOOL_NAME, "sending", events.length, "to selection model")
-        const selectedIdObject = await (await trafficSelectionAgent(topics[0].topic, events))
+        const selectedIdObject = await (await trafficSelectionAgent(topics.map(topic => topic.topic), events))
         logInfo(TRAFFIC_TOOL_NAME, "selected", selectedIdObject.object.length, "traffic events")
         const selectedIds = new Set(selectedIdObject.object)
-        response.data.features = response.data.features.filter(event => selectedIds.has(event.properties.id))
+        response.data.features = response.data.features
+        .filter(event => selectedIds.has(event.properties.id))
+        .sort((e1, e2) => {
+          if (e1.properties.priority !== e2.properties.priority) {
+            return e2.properties.priority - e1.properties.priority; // Higher priority first
+          }
+          return new Date(e2.properties.updateDate).getTime() - new Date(e1.properties.updateDate).getTime(); // Most recent first
+        })
         logInfo(TRAFFIC_TOOL_NAME, "final selection is", response.data.features.length, "traffic events")
       }
       return { displayMap, events: response.data, numberOfEvents: response.data.features.length, error: response.error }

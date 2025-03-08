@@ -15,6 +15,7 @@
     "## Istruzioni",
     "- invoca il tool per la selezione del traffico per acquisire i dati",
     "- se è richiesta la mappa rispondi con il numero di eventi presenti",
+    "- se non è richiesta la mappa rispondi con una lista markdown di massimo 10 eventi",
     "- Usa solo le informazioni dei tool per rispondere, non usare la tua conoscenza"
   ]
 }
