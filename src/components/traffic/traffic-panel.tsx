@@ -69,8 +69,10 @@ export function TrafficEventCard({ event, setMapMBR }: TrafficEventCardProps ) {
     <div key={event.properties.id} className="relative flex flex-row justify-between items-center w-full">
       <div>
         <p className="font-bold">{event.properties.road}</p>
+        <p>Agg.: {new Date(event.properties.updateDate).toLocaleString()}</p>
         <p>{event.properties.description}</p>
         <p>{event.properties.location}</p>
+        {event.properties.source && <p className="font-bold">Fonte: {event.properties.source}</p>}
       </div>
       <Button variant="ghost" onClick={() => setMapMBR(bbox)}>
         <ZoomIn />
