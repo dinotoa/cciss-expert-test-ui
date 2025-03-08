@@ -56,7 +56,7 @@ function MapZoomControl({ desiredMBR, fullMBR }: { fullMBR?: MapRectangle, desir
     [desiredMBR, map])
   logInfo("full mbr", fullMBR)
   return <>
-    <ZoomControl position="topright" />
+    <ZoomControl position="bottomright" />
     <Button type="button" variant="secondary" className="absolute top-2 left-2 z-[2000] bg-white"
       onClick={() => fullMBR && map.fitBounds(fullMBR)}><Maximize /></Button>
   </>
