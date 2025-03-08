@@ -1,16 +1,16 @@
 "use client"
-import dynamic from "next/dynamic";
 import React, { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools"
-import *  as turf from "@turf/turf"
-import { MapRectangle } from "@/lib/location-database/geography";
-import { logInfo } from "@/lib/logging";
-import { Button } from "../ui/button";
-import { Maximize2, Minimize2, ZoomIn } from "lucide-react";
-import { TrafficEventType } from "@/lib/traffic-database/traffic-database-types";
+import dynamic from "next/dynamic";
+import * as turf from "@turf/turf";
 import { Feature, FeatureCollection, Geometry } from "geojson";
+import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { ScrollArea } from "../ui/scroll-area";
+import { Maximize2, Minimize2, Search, X, ZoomIn } from "lucide-react";
+import { MapRectangle } from "@/lib/location-database/geography";
+import { TrafficEventType } from "@/lib/traffic-database/traffic-database-types";
+import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools";
 
 interface TrafficPanelProps extends React.HTMLProps<HTMLElement> {
   eventData: TrafficEventToolResponse
@@ -28,6 +28,10 @@ const MapPanel = dynamic(() => import("./traffic-map"), { ssr: false })
 const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, eventData }) => {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const filteredEvents = eventData.events?.features.length ?
+    turf.featureCollection(eventData?.events?.features?.filter(e => filterEvent(searchTerm, e)))
+    : undefined
 
   // Handle fullscreen change events
   useEffect(() => {
@@ -55,9 +59,8 @@ const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, eventDa
       console.error("Fullscreen API error:", error)
     }
   }
-  const fullMbr = eventData.events ? turfBboxToLeafletBounds(turf.bbox(eventData.events)) : turfBboxToLeafletBounds([8, 40, 12, 45])
+  const fullMbr = filteredEvents ? turfBboxToLeafletBounds(turf.bbox(filteredEvents)) : turfBboxToLeafletBounds([8, 40, 12, 45])
   const [mapMBR, setMapMBR] = useState(fullMbr)
-  logInfo(eventData)
   return eventData.displayMap && eventData.events?.features.length ?
     <section ref={panelRef} id={id} className={cn("relative w-full h-[30rem] flex flex-row justify-between items-start gap-0",
       isFullscreen ? "bg-background" : "relative", className)}>
@@ -65,22 +68,46 @@ const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, eventDa
         {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
       </Button>
 
-      <EventListPanel className="w-[50%] h-full" events={eventData.events || []} setMapMBR={setMapMBR} />
+      <EventListPanel className="w-[50%] h-full" events={filteredEvents} setMapMBR={setMapMBR}
+        searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       <MapPanel className="w-[75%] h-full" desiredMBR={mapMBR} setMapMBR={setMapMBR} fullMBR={fullMbr}
-        events={eventData.events}
+        events={filteredEvents}
         iconUrl="https://luceverde.it/icons/city-map-pin.svg" />
     </section>
     : null
 }
 
 interface EventListPanelProps extends React.HTMLProps<HTMLElement> {
-  events: FeatureCollection<Geometry, TrafficEventType>,
+  events?: FeatureCollection<Geometry, TrafficEventType>
   setMapMBR: (mbr: MapRectangle) => void
+  searchTerm: string
+  setSearchTerm: (searchTerm: string) => void
 }
 
-const EventListPanel: React.FC<EventListPanelProps> = ({ id, className, events, setMapMBR }) => {
+const EventListPanel: React.FC<EventListPanelProps> = ({ id, className, events, setMapMBR, searchTerm, setSearchTerm }) => {
   return (
     <aside id={id} className={cn("flex flex-col h-full w-full items-start border border-neutral-200", className)}>
+      <div className="my-1 px-1 w-full">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Filtra eventi..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <Button variant="ghost"
+              onClick={() => setSearchTerm("")}
+              className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
       <ScrollArea className="w-full overflow-auto">
         {events && events.features.map(evt => (
           <div key={evt.properties.id} className="border-b border-neutral-200 hover:bg-neutral-200 p-2">
@@ -114,5 +141,14 @@ export function TrafficEventCard({ event, setMapMBR }: TrafficEventCardProps) {
       </Button>
     </div>
   )
+}
+
+function filterEvent(searchTerm: string, event: Feature<Geometry, TrafficEventType>): boolean {
+  const normalisedSearchTerm = searchTerm.toLowerCase().trim()
+  if (normalisedSearchTerm.length === 0) return true
+  return (event.properties.road.toLowerCase().includes(normalisedSearchTerm) ||
+    event.properties.description.toLowerCase().includes(normalisedSearchTerm) ||
+    event.properties.location.toLowerCase().includes(normalisedSearchTerm) ||
+    event.properties.source?.toLowerCase().includes(normalisedSearchTerm)) ?? true
 }
 export default TrafficEventPanel
