@@ -3,21 +3,25 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CircleHelp, X } from "lucide-react";
-import SUGGESTIONS from "@/data/chat-suggestions.json"
 import { useState } from "react";
 
-type ChatSuggestionList = typeof SUGGESTIONS
+export interface ChatSuggestionType {
+  topic: string
+  suggestions: string[]
+}
 
 type ChatSuggestionProps = React.HTMLProps<HTMLElement> & {
   open: boolean
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
   setPrompt: React.Dispatch<React.SetStateAction<string>>
+  suggestions?: ChatSuggestionType[]
 }
 
 const ChatSuggestionsPanel: React.FC<ChatSuggestionProps> = ({ id = "chat-suggestion-panel", className,
-  open, setOpen, setPrompt }) => {
-  const [selectedTopic, setSelectedTopic] = useState(SUGGESTIONS[0]?.topic)
-  return (
+  open, setOpen, setPrompt, suggestions }) => {
+  const isValid = suggestions && Array.isArray(suggestions) && suggestions.length > 0
+  const [selectedTopic, setSelectedTopic] = useState(isValid ? suggestions[0].topic : "")
+  return isValid && (
     <Popover open={open}>
       <PopoverTrigger asChild>
         <Button type="button" variant="outline" onClick={() => setOpen(!open)}><CircleHelp />Suggerimenti</Button>
@@ -27,11 +31,11 @@ const ChatSuggestionsPanel: React.FC<ChatSuggestionProps> = ({ id = "chat-sugges
         side="top"
       >
         <div className="w-fit max-w-[40rem] max-h-[20rem] flex overflow-hidden gap-2">
-          <ChatSuggestionTopicPanel suggestions={SUGGESTIONS}
+          <ChatSuggestionTopicPanel suggestions={suggestions}
             className="border-r-2 pr-1"
             selectedTopic={selectedTopic} setSelectedTopic={setSelectedTopic} />
           <ChatSuggestionListPanel id={`${id}__suggestions`}
-            suggestions={SUGGESTIONS.find(s => s.topic === selectedTopic)?.suggestions ?? []}
+            suggestions={suggestions.find(s => s.topic === selectedTopic)?.suggestions ?? []}
             setOpen={setOpen} setPrompt={setPrompt} />
         </div>
         <Button type="button" variant="outline" onClick={() => setOpen(false)}><X /></Button>
@@ -41,7 +45,7 @@ const ChatSuggestionsPanel: React.FC<ChatSuggestionProps> = ({ id = "chat-sugges
 }
 
 interface ChatSuggestionTopicProps extends React.HTMLProps<HTMLElement> {
-  suggestions: ChatSuggestionList
+  suggestions: ChatSuggestionType[],
   selectedTopic: string,
   setSelectedTopic: React.Dispatch<React.SetStateAction<string>>
 }

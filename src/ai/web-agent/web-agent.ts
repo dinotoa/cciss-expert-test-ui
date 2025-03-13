@@ -3,7 +3,7 @@ import { google } from '@ai-sdk/google'
 import { z } from 'zod'
 import { logInfo } from '@/lib/logging'
 import { infoAgent } from '../info-agent/info-agent'
-import { AgentEnumZod, WEB_AGENT_NAME } from '../library'
+import { AgentEnumZod, WEB_AGENT_NAME } from '../ai-library'
 import config from "./web-agent.config.json"
 import { trafficAgent } from '../traffic-agent/traffic-agent'
 

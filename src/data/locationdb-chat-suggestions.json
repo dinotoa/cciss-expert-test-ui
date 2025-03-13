@@ -1,0 +1,21 @@
+[
+  {
+    "topic": "Informazioni",
+    "suggestions": [
+      "chi sei?",
+      "cosa puoi fare per me?",
+      "come posso contattarvi?",
+      "quali sono i servizi del CCISS?",
+      "su quali canali social è presente il CCISS?",
+      "chi fornisce le informazioni?"
+    ]
+  },
+  { 
+    "topic": "Aree",
+    "suggestions": [
+      "informazioni sulla provincia di roma",
+      "informazioni sul piemonte",
+      "città in provincia di roma"
+    ]
+  }
+]

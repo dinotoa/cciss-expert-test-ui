@@ -1,0 +1,33 @@
+[
+  {
+    "topic": "Informazioni",
+    "suggestions": [
+      "chi sei?",
+      "cosa puoi fare per me?",
+      "come posso contattarvi?",
+      "quali sono i servizi del CCISS?",
+      "su quali canali social è presente il CCISS?",
+      "chi fornisce le informazioni?"
+    ]
+  },
+  { 
+    "topic": "Traffico",
+    "suggestions": [
+      "mappa degli incidenti a Roma",
+      "Quali sono le fonti utilizzate dal CCISS per il traffico?",
+      "mi dici la situazione del traffico a Milano?",
+      "mappa degli incidenti a Milano",
+      "quali incidenti sono in corso a Roma?",
+      "mostrami la mappa del traffico a Lecce"
+    ]
+  },
+  { 
+    "topic": "Bollettini",
+    "suggestions": [
+      "Bollettino del traffico di roma",
+      "mi fai un bollettino breve del traffico a Milano?",
+      "mi fai un bollettino standard per Genova?",
+      "mi fai un bollettino lungo per Lecce?"
+    ]
+  }
+]

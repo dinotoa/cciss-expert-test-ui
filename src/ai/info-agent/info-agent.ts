@@ -2,7 +2,7 @@ import { logInfo } from '@/lib/logging'
 import { google } from '@ai-sdk/google'
 import { DataStreamWriter, Message, streamText, StreamTextResult, ToolSet } from 'ai'
 import config from "./info-agent.config.json"
-import { INFO_AGENT_NAME } from '../library'
+import { INFO_AGENT_NAME } from '../ai-library'
 
 const AGENT_NAME = `${INFO_AGENT_NAME}:`
 const MAX_STEPS = config.maxSteps || 5

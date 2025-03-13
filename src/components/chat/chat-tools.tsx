@@ -1,5 +1,5 @@
-import { TRAFFIC_TOOL_NAME } from "@/ai/library"
-import TrafficEventPanel from "../traffic/traffic-panel"
+import { TRAFFIC_TOOL_NAME } from "@/ai/ai-library"
+import TrafficEventPanel from "../traffic-chat/traffic-panel"
 import { logInfo } from "@/lib/logging"
 import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools"
 import { ToolInvocation } from "ai"

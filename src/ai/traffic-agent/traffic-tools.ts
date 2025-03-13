@@ -2,7 +2,7 @@ import { tool as createTool } from 'ai'
 import { z } from 'zod'
 import { logErr, logInfo } from '@/lib/logging'
 import { TrafficEventType, ZTopicType, } from "../../lib/traffic-database/traffic-database-types"
-import { TRAFFIC_TOOL_NAME } from '../library'
+import { TRAFFIC_TOOL_NAME } from '../ai-library'
 import { fetchTrafficInfoByFeatures } from '@/lib/traffic-database/traffic-database'
 import { FeatureCollection, Geometry } from 'geojson'
 import { trafficSelectionAgent } from './traffic-selection-agent'

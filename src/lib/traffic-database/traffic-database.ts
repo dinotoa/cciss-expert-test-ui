@@ -1,9 +1,8 @@
-import { Geometry } from "geojson";
+import { fetchTrafficDataBySlug } from "@/lib/traffic-database/luceverde-api";
 import * as turf from '@turf/turf';
+import { Geometry } from "geojson";
 import { getLocationsByTypeName } from "../location-database/location-db";
 import { TopicArrayType, TrafficDataResponse } from "./traffic-database-types";
-import { fetchTrafficDataBySlug } from "@/lib/traffic-database/luceverde-api";
-import { logErr } from "../logging";
 
 
 export async function fetchTrafficInfoByFeatures(topics: TopicArrayType): Promise<TrafficDataResponse> {

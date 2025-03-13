@@ -3,11 +3,12 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Loader2, Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ChatSuggestion from "./chat-suggestion";
+import ChatSuggestion, { ChatSuggestionType } from "./chat-suggestion";
 
 type ChatInputProps = React.HTMLProps<HTMLElement> & {
   isLoading: boolean
   prompt: string
+  suggestions: ChatSuggestionType[]
   setPrompt: React.Dispatch<React.SetStateAction<string>>
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => void,
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void,
@@ -15,7 +16,7 @@ type ChatInputProps = React.HTMLProps<HTMLElement> & {
 
 const ChatInputPanel: React.FC<ChatInputProps> = ({ id = "chat-input-panel",
   className, isLoading,
-  prompt, setPrompt, handleInputChange, handleSubmit }) => {
+  prompt, setPrompt, handleInputChange, handleSubmit, suggestions }) => {
   const [suggestionOpen, setSuggestionOpen] = React.useState(false)
   const areaRef = React.useRef<HTMLTextAreaElement>(null)
   const setSuggestionOpenAndFocus: React.Dispatch<React.SetStateAction<boolean>> = (open) => {
@@ -45,7 +46,8 @@ const ChatInputPanel: React.FC<ChatInputProps> = ({ id = "chat-input-panel",
           />
           <div className="w-full flex flex-row justify-between gap-1">
             <div className="flex p-0 m-0 gap-1">
-              <ChatSuggestion open={suggestionOpen} setOpen={setSuggestionOpenAndFocus} setPrompt={setPrompt} />
+              <ChatSuggestion suggestions={suggestions}
+                open={suggestionOpen} setOpen={setSuggestionOpenAndFocus} setPrompt={setPrompt} />
               <Button type="button" variant="outline" onClick={() => setPrompt("")}>
                 <Trash2 />Cancella
               </Button>

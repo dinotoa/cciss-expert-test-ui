@@ -7,4 +7,4 @@ import cityData from "@/data/rdstmc-cities.json"
 import roadData from "@/data/rdstmc-roads.json"
 import segmentData from "@/data/rdstmc-segments.json"
 
-export { regionData, provinceData, cityData }
+export { regionData, provinceData, cityData, roadData, segmentData, zoneData }

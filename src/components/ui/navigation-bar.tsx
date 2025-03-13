@@ -9,8 +9,13 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 
 const navLinks = [
   {
-    label: "Chat",
-    href: "/",
+    label: "Traffico",
+    href: "/traffic",
+    external: false
+  },
+  {
+    label: "Location DB",
+    href: "/location-db",
     external: false
   },
   {
@@ -44,7 +49,7 @@ const NavigationBar: React.FC<React.HTMLProps<HTMLElement>> = ({
           ))}
         </NavigationMenuList>
       </NavigationMenu>
-      <div className="p-0 m-0 flex items-center gap-2">
+      <div className="p-0 m-0 flex items-baseline gap-2">
         <Button type="button" variant="outline"><RefreshCw />
           <a href="/">Nuova chat</a>
         </Button>
