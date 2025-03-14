@@ -46,7 +46,7 @@ export interface LDbRoadProps extends LDbPointProps {
 export type LDbAreaFeature = Feature<Geometry, LDbFeatureProps>
 export type LDbPointFeature = Feature<Geometry, LDbPointProps>
 export type LDbRoadFeature = Feature<Geometry, LDbRoadProps>
-export type LdbFeature = LDbAreaFeature | LDbPointFeature | LDbRoadFeature
+export type LDbFeature = LDbAreaFeature | LDbPointFeature | LDbRoadFeature
 
 export function isArea(type: LdbFeatureTypeEnum) {
   return type === LdbFeatureTypeEnum.Zone || type === LdbFeatureTypeEnum.Region ||

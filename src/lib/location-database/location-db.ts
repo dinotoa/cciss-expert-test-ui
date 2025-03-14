@@ -1,7 +1,7 @@
-import { FeatureCollection, Feature, Geometry } from "geojson"
-import { logErr, logInfo } from "../logging"
+import { FeatureCollection, Geometry } from "geojson"
+import { logErr } from "../logging"
 import { cityData, provinceData, regionData, roadData } from "./location-db-data"
-import { getChildAreaTypes, isArea, isRoad, LDbAreaFeature, LdbFeature, LDbFeatureProps, LdbFeatureTypeEnum, LDbRoadFeature, LDbRoadProps } from "./location-db-types"
+import { getChildAreaTypes, isRoad, LDbAreaFeature, LDbFeature, LDbFeatureProps, LdbFeatureTypeEnum, LDbRoadFeature, LDbRoadProps } from "./location-db-types"
 
 const LDbRegions = (regionData as unknown as FeatureCollection<Geometry, LDbFeatureProps>).features.reduce(reduceAreaFeatures, {})
 const LDbProvinces = (provinceData as unknown as FeatureCollection<Geometry, LDbFeatureProps>).features.reduce(reduceAreaFeatures, {});
@@ -10,10 +10,10 @@ const LDbAreas = {
   ...LDbRegions,
   ...LDbProvinces,
   ...LDbCities,
-};
+}
 const LDbRoads = (roadData as unknown as FeatureCollection<Geometry, LDbRoadProps>).features.reduce(reduceRoadFeatures, {})
 
-export function getLocationsByTypeName(type: LdbFeatureTypeEnum, name: string): LdbFeature[] {
+export function getLocationsByTypeName(type: LdbFeatureTypeEnum, name: string): LDbFeature[] {
   switch (type) {
     case LdbFeatureTypeEnum.Region:
       return getAreasByName(LDbRegions, name)
@@ -54,6 +54,10 @@ export function getAreaChildren(area: LDbAreaFeature, childrenType: LdbFeatureTy
     return children
   }
   return []
+}
+
+export function getFeaturesById(ids: number[]): LDbFeature[] {
+  return ids.map(id => LDbAreas[id] || LDbRoads[id])
 }
 
 function getAreasByName(areas: { [id: number]: LDbAreaFeature }, name: string): LDbAreaFeature[] {

@@ -24,6 +24,10 @@ export function reduceMBR(initial: MapRectangle, next: MapRectangle): MapRectang
   ]
 }
 
+export function rectangleXyToLonLat(bbox: number[]): MapRectangle {
+  return [[bbox[1], bbox[0]], [bbox[3], bbox[2]]] as MapRectangle
+}
+
 export function mapFeatureMbr(geometry: Geometry): MapRectangle {
   let minLat = Infinity;
   let minLng = Infinity;

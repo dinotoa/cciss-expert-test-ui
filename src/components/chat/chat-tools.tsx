@@ -1,8 +1,10 @@
-import { TRAFFIC_TOOL_NAME } from "@/ai/ai-library"
+import { AREA_CHILDREN_TOOL_NAME, AREA_INFO_TOOL_NAME, TRAFFIC_TOOL_NAME } from "@/ai/ai-library"
 import TrafficEventPanel from "../traffic-chat/traffic-panel"
 import { logInfo } from "@/lib/logging"
 import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools"
 import { ToolInvocation } from "ai"
+import LocationDatabasePanel from "../location-database/locationdb-panel"
+import { LocationDbResponseType } from "@/ai/locationdb-agent/locationdb-tools"
 
 export interface ToolPanelProps extends React.HTMLProps<HTMLElement> {
   response: string
@@ -16,6 +18,9 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({ id, className, response, i
   switch (toolName) {
     case "trafficEventSelectionTool":
       return <TrafficEventPanel id={id} className={className} eventData={toolResult as TrafficEventToolResponse} />
+    case AREA_INFO_TOOL_NAME:
+    case AREA_CHILDREN_TOOL_NAME:
+      return <LocationDatabasePanel id={id} className={className} locationData={toolResult as LocationDbResponseType} />
     // case "initiativeTool":
     //   return <InitiativesPanel id={id} className={className} initiativeData={toolData as InitiativeToolResponse} />
     // case "trafficEventSelectionTool":

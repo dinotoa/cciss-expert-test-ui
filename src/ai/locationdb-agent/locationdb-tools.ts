@@ -1,6 +1,6 @@
 import { getErrorMessage } from "@/lib/error-handling"
 import { getAreaChildren, getLocationsByTypeName } from "@/lib/location-database/location-db"
-import { isParentType, LdbFeature, LdbFeatureTypeEnum, ZLdbFeatureTypeEnum } from "@/lib/location-database/location-db-types"
+import { isParentType, LDbFeature, LdbFeatureTypeEnum, ZLdbFeatureTypeEnum } from "@/lib/location-database/location-db-types"
 import { logErr, logInfo } from "@/lib/logging"
 import { tool } from "ai"
 import { z } from "zod"
@@ -32,7 +32,7 @@ const ZLocationDbRequest = z.object({
     relatedLocationType: ZLdbFeatureTypeEnum.optional().describe("tipo delle località children"),
 })
 
-interface LocationDbResponseType {
+export interface LocationDbResponseType {
     errorMessage?: string
     showMap?: boolean
     locations?: LocationData[]
@@ -81,7 +81,7 @@ const areaChildrenTool = tool({
     }
 })
 
-function mapLocationData(location: LdbFeature): LocationData {
+function mapLocationData(location: LDbFeature): LocationData {
     return {
         "id": location.properties.id,
         "parentAreaId": location.properties.parentAreaId,

@@ -29,8 +29,8 @@ const ChatResponsePanel: React.FC<ChatMessageProps> = ({ id = "chat-message-pane
             : <MarkdownPanel content={message.content} />
           }
           {message.parts?.map(part => (
-            part.type === "tool-invocation" && (part.toolInvocation as ToolInvocation).state === "result" ?
-              <ToolPanel key={(part.toolInvocation as ToolInvocation).toolCallId} className="py-4" 
+            !isLoading && part.type === "tool-invocation" && (part.toolInvocation as ToolInvocation).state === "result" ?
+              <ToolPanel key={(part.toolInvocation as ToolInvocation).toolCallId}
                 response={message.content ?? ""} 
                 invocation={part.toolInvocation as ToolInvocation}
                 />

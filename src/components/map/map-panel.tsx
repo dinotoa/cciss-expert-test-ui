@@ -1,13 +1,13 @@
 "use client"
-import "leaflet/dist/leaflet.css";
+import { Button } from "@/components/ui/button";
+import { MapRectangle } from "@/lib/location-database/geography";
+import { logInfo } from "@/lib/logging";
 import { cn } from "@/lib/utils";
 import * as L from "leaflet";
-import { MapContainer, TileLayer, useMap, ZoomControl } from "react-leaflet";
-import { MapRectangle } from "@/lib/location-database/geography";
-import { useEffect } from "react";
-import { Button } from "../ui/button";
+import "leaflet/dist/leaflet.css";
 import { Maximize } from "lucide-react";
-import { logInfo } from "@/lib/logging";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, useMap, ZoomControl } from "react-leaflet";
 
 const outerBounds = new L.LatLngBounds(
   [[43, 7.5],
@@ -54,7 +54,6 @@ function MapZoomControl({ desiredMBR, fullMBR }: { fullMBR?: MapRectangle, desir
   const map = useMap()
   useEffect(() => { map.fitBounds(desiredMBR || outerBounds) },
     [desiredMBR, map])
-  logInfo("full mbr", fullMBR)
   return <>
     <ZoomControl position="bottomright" />
     <Button type="button" variant="secondary" className="absolute top-2 left-2 z-[2000] bg-white"
