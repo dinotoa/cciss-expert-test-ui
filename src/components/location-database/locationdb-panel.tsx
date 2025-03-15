@@ -45,21 +45,19 @@ const LocationDatabasePanel: React.FC<TrafficPanelProps> = ({ id = "location-pan
     }
     return undefined
   }, [filteredLocations])
+  function changeSelectedItem(item: LDbFeature) {
+    logInfo("ldb-pnl: selected", item.properties.id)
+    setSelectedId(item.properties.id)
+  }
   return (
     <FullScreenPanel id={id} className={cn("flex flex-col justify-between w-full h-[30rem]", className)}>
-      <section id={`${id}__container`} className={"relative w-full h-full flex flex-row justify-between items-start gap-1"}>
+      <section id={`${id}__container`} className={"relative w-full h-full flex flex-row justify-between items-start gap-1 border"}>
         {features === undefined
           ? <LoadingPanel message="Caricamento dati..." />
-          : <SearchableListPanel id={`${id}__search`} className="w-[30%] h-full p-2" searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
-            <ul role="listbox" className="w-full h-full">
-              {filteredLocations?.map(location => (
-                <li key={location.properties.id} 
-                  className={cn("w-full rounded", selectedId === location.properties.id ? "bg-primary text-primary-foreground" : "")} 
-                  onClick={() => setSelectedId(location.properties.id)}>
-                  <LocationDataPanel key={location.properties.id} feature={location} setMapMBR={setMapMBR} />
-                </li>
-              ))}
-            </ul>
+          : <SearchableListPanel id={`${id}__search`} className="w-[30%] h-full p-1" 
+            searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+            items={filteredLocations} onSelectionChanged={changeSelectedItem}
+            createItemPanel={(item) => <LocationDataPanel feature={item} setMapMBR={setMapMBR} />}>
           </SearchableListPanel>
         }
         <MapPanel id={`${id}__map`} className="w-[70%] h-full" features={filteredLocations} fullMBR={fullMBR} desiredMBR={mapMBR} setMapMBR={setMapMBR} />
@@ -74,7 +72,7 @@ interface LocationDataPanelProps extends React.HTMLProps<HTMLElement> {
 }
 
 const LocationDataPanel: React.FC<LocationDataPanelProps> = ({ id, className, feature, setMapMBR }) => {
-  return <div id={id} className={cn("flex flex-row justify-between items-center gap-1 p-2 rounded", className)}>
+  return <div id={id} className={cn("w-full flex flex-row justify-between items-center gap-1 p-2 rounded", className)}>
     <div className="w-full">
       <p>{feature.properties.tmcTypeDescription ?? feature.properties.type}</p>
       <p className="font-bold text">{feature.properties.name}</p>
