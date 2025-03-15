@@ -74,7 +74,6 @@ const areaChildrenTool = tool({
             const data = parentData.flatMap(p => getAreaChildren(p, childLocationType))
             .sort((a, b) => a.properties.name.localeCompare(b.properties.name))
             logInfo(`${TOOL_NAME}: returning ${data.length} locations`)
-            logInfo(`${TOOL_NAME}: returning ${data.length} locations`)
             return { showMap, locations: data.map(mapLocationData) }
         } catch (error) {
             logErr(`${TOOL_NAME}: ${error}`)
