@@ -72,6 +72,8 @@ const areaChildrenTool = tool({
                 return { errorMessage: `Nessuna ${parentLocationType} trovata per ${parentLocationName}` }
             }
             const data = parentData.flatMap(p => getAreaChildren(p, childLocationType))
+            .sort((a, b) => a.properties.name.localeCompare(b.properties.name))
+            logInfo(`${TOOL_NAME}: returning ${data.length} locations`)
             logInfo(`${TOOL_NAME}: returning ${data.length} locations`)
             return { showMap, locations: data.map(mapLocationData) }
         } catch (error) {
