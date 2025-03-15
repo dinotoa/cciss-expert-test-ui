@@ -14,13 +14,14 @@ import FullScreenPanel from "../tools/fullscreen-panel"
 import SearchableListPanel from "../tools/searchable-list"
 import { Button } from "../ui/button"
 
-interface TrafficPanelProps extends React.HTMLProps<HTMLElement> {
+interface LocationDatabasePanelProps extends React.HTMLProps<HTMLElement> {
+  createItemPanel?: (item: LDbFeature) => React.ReactNode
   locationData: LocationDbResponseType
 }
 
 const MapPanel = dynamic(() => import("./locationdb-map"), { ssr: false })
 
-const LocationDatabasePanel: React.FC<TrafficPanelProps> = ({ id = "location-panel", className, locationData }) => {
+const LocationDatabasePanel: React.FC<LocationDatabasePanelProps> = ({ id = "location-panel", className, locationData }) => {
   const loadFeatures = async () => {
     logInfo("ldb-pnl: loading", locationData?.locations?.length, "features", locationData)
     const features = await getLdbFeatures(locationData.locations ? locationData.locations?.map(l => l.id) : [])
@@ -30,7 +31,7 @@ const LocationDatabasePanel: React.FC<TrafficPanelProps> = ({ id = "location-pan
   const [searchTerm, setSearchTerm] = useState("")
   const [features, setFeatures] = useState<LDbFeature[]>()
   const [mapMBR, setMapMBR] = useState<MapRectangle>()
-  const [selectedId, setSelectedId] = useState<number>(-1)
+  const [selectedItem, setSelectedItem] = useState<LDbFeature>()
 
   useEffect(() => {
     loadFeatures()
@@ -46,21 +47,22 @@ const LocationDatabasePanel: React.FC<TrafficPanelProps> = ({ id = "location-pan
     return undefined
   }, [filteredLocations])
   function changeSelectedItem(item: LDbFeature) {
-    logInfo("ldb-pnl: selected", item.properties.id)
-    setSelectedId(item.properties.id)
+    setSelectedItem(item)
   }
+  const createItemPanel = (item: LDbFeature) => <LocationDataPanel feature={item} setMapMBR={setMapMBR} />
   return (
     <FullScreenPanel id={id} className={cn("flex flex-col justify-between w-full h-[30rem]", className)}>
       <section id={`${id}__container`} className={"relative w-full h-full flex flex-row justify-between items-start gap-1 border"}>
         {features === undefined
           ? <LoadingPanel message="Caricamento dati..." />
-          : <SearchableListPanel id={`${id}__search`} className="w-[30%] h-full p-1" 
-            searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+          : <SearchableListPanel id={`${id}__search`} className="w-[30%] h-full p-1"
+            searchTerm={searchTerm} setSearchTerm={setSearchTerm} getItemKey={(item) => item?.properties?.id.toString()}
             items={filteredLocations} onSelectionChanged={changeSelectedItem}
-            createItemPanel={(item) => <LocationDataPanel feature={item} setMapMBR={setMapMBR} />}>
-          </SearchableListPanel>
+            createItemPanel={createItemPanel} />
         }
-        <MapPanel id={`${id}__map`} className="w-[70%] h-full" features={filteredLocations} fullMBR={fullMBR} desiredMBR={mapMBR} setMapMBR={setMapMBR} />
+        <MapPanel id={`${id}__map`} className="w-[70%] h-full"
+          features={filteredLocations} selectedFeature={selectedItem}
+          fullMBR={fullMBR} desiredMBR={mapMBR} setMapMBR={setMapMBR} />
       </section>
     </FullScreenPanel>
   )
@@ -71,13 +73,13 @@ interface LocationDataPanelProps extends React.HTMLProps<HTMLElement> {
   setMapMBR: (mbr: MapRectangle) => void
 }
 
-const LocationDataPanel: React.FC<LocationDataPanelProps> = ({ id, className, feature, setMapMBR }) => {
-  return <div id={id} className={cn("w-full flex flex-row justify-between items-center gap-1 p-2 rounded", className)}>
+export const LocationDataPanel: React.FC<LocationDataPanelProps> = ({ id, className, feature, setMapMBR }) => {
+  return <div id={id} className={cn("w-full flex flex-row justify-between items-center gap-2 p-2 rounded", className)}>
     <div className="w-full">
       <p>{feature.properties.tmcTypeDescription ?? feature.properties.type}</p>
       <p className="font-bold text">{feature.properties.name}</p>
     </div>
-    <Button type="button" variant="secondary" className="w-8 h-8 p-2" onClick={() => { setMapMBR(rectangleXyToLonLat(turf.bbox(feature))) }}>
+    <Button type="button" variant="secondary" className="w-8 h-8 p-2" onClick={(e) => { e.stopPropagation(); setMapMBR(rectangleXyToLonLat(turf.bbox(feature))) }}>
       <ScanSearch />
     </Button>
   </div>

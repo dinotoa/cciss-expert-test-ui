@@ -52,12 +52,18 @@ const MapPanel: React.FC<MapPanelProps> = ({ id = "map-panel", className, childr
 
 function MapZoomControl({ desiredMBR, fullMBR }: { fullMBR?: MapRectangle, desiredMBR?: MapRectangle }) {
   const map = useMap()
-  useEffect(() => { map.fitBounds(desiredMBR || outerBounds) },
+  useEffect(() => { fitBounds(desiredMBR) },
     [desiredMBR, map])
+  const fitBounds = (mbr: MapRectangle | undefined) => {
+    if (mbr) {
+      map.eachLayer(l => l.closePopup())
+      map.fitBounds(mbr)
+    }
+  }
   return <>
     <ZoomControl position="bottomright" />
     <Button type="button" variant="secondary" className="absolute top-2 left-2 z-[2000] bg-white"
-      onClick={() => fullMBR && map.fitBounds(fullMBR)}><Maximize /></Button>
+      onClick={() => fitBounds(fullMBR)}><Maximize /></Button>
   </>
 }
 

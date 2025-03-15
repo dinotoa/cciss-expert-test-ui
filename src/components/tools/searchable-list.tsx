@@ -8,6 +8,7 @@ import { logInfo } from "@/lib/logging"
 
 interface SelectableListProps extends React.HTMLProps<HTMLElement> {
     items: any[]
+    getItemKey: (item: any) => string
     onSelectionChanged: (selectedItem: any) => void
     createItemPanel: (item: any) => React.ReactNode
 }
@@ -17,10 +18,11 @@ interface SearchableListPanelProps extends SelectableListProps {
     setSearchTerm: (searchTerm: string) => void
 }
 
-const SearchableListPanel: React.FC<SearchableListPanelProps> = ({ id = "search-panel", className, 
+const SearchableListPanel: React.FC<SearchableListPanelProps> = ({ id = "search-panel", className,
     items, onSelectionChanged, createItemPanel,
-    searchTerm, setSearchTerm }) => {
+    searchTerm, setSearchTerm, getItemKey }: SearchableListPanelProps) => {
     return (
+
         <div id={id} className={cn("flex flex-col h-full gap-1 w-full overflow-hidden", className)}>
             <div className="relative flex m-1">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -45,6 +47,7 @@ const SearchableListPanel: React.FC<SearchableListPanelProps> = ({ id = "search-
             <ScrollArea className="w-full h-full overflow-auto">
                 <SelectableList
                     items={items}
+                    getItemKey={getItemKey}
                     onSelectionChanged={onSelectionChanged}
                     createItemPanel={createItemPanel}
                 />
@@ -57,7 +60,7 @@ function SelectableList({
     items,
     onSelectionChanged,
     className,
-    label,
+    getItemKey,
     createItemPanel
 }: SelectableListProps) {
     const [focusedIndex, setFocusedIndex] = React.useState<number>(-1)
@@ -71,9 +74,9 @@ function SelectableList({
 
     useEffect(() => {
         if (focusedIndex >= 0) {
-            const selectedElement = window.document.getElementById(`option-${focusedIndex}`);
-            selectedElement?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            logInfo("scrolling to", focusedIndex)
+            const elementKey = getItemKey(items[focusedIndex])
+            const selectedElement = window.document.getElementById(elementKey);
+            selectedElement?.scrollIntoView({ behavior: 'auto', block: 'nearest' });
         }
     }, [focusedIndex]);
 
@@ -109,9 +112,6 @@ function SelectableList({
 
     return (
         <div className="flex flex-col gap-1.5">
-            <div id="list-label" className="text-sm font-medium">
-                {label}
-            </div>
             <ul
                 role="listbox"
                 aria-labelledby="list-label"
@@ -128,21 +128,21 @@ function SelectableList({
                 {items.map((item, index) => {
                     const isSelected = selectedIndex === index
                     const isFocused = index === focusedIndex
-
+                    const key = getItemKey(item)
                     return (
                         <li
                             key={index}
-                            id={`option-${index}`}
+                            id={`${key}`}
                             role="option"
                             aria-selected={isSelected}
                             data-focused={isFocused}
                             data-selected={isSelected}
                             className={cn(
                                 "flex cursor-pointer items-center justify-between rounded-sm text-sm transition-colors",
+                                index !== items.length - 1 && "border-b ",
                                 isSelected && "bg-primary text-primary-foreground",
                                 !isSelected && isFocused && "bg-accent text-accent-foreground",
-                                !isSelected && !isFocused && "hover:bg-accent hover:text-accent-foreground".
-                                index !== items.length - 1 && "border-b ",
+                                !isSelected && !isFocused && "hover:bg-accent hover:text-accent-foreground"
                             )}
                             onClick={() => handleSelect(index)}
                         >
@@ -156,4 +156,4 @@ function SelectableList({
 }
 
 
-export default SearchableListPanel
+export default SearchableListPanel;
