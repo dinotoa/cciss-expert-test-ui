@@ -36,7 +36,10 @@ const ChatInputPanel: React.FC<ChatInputProps> = ({ id = "chat-input-panel",
             autoFocus={true}
             spellCheck={true}
             placeholder="Inserire la richiesta, e premere invio"
-            onChange={handleInputChange}
+            // Use the native onChange event handler
+            {...{
+              onChange: handleInputChange
+            }}
             onKeyDown={e => {
               if (!isLoading && (e.key === 'Enter') && !e.shiftKey && ("form" in e.target)) {
                 e.preventDefault();

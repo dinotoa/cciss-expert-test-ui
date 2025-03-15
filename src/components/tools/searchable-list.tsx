@@ -32,7 +32,12 @@ const SearchableListPanel: React.FC<SearchableListPanelProps> = ({ id = "search-
                     placeholder="Cerca..."
                     className="pl-8"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.currentTarget.value)}
+                    // Use the native onChange event handler to prevent TSC compiler errors
+                    {...{
+                        onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                            setSearchTerm(e.target.value)
+                        },
+                    }}
                 />
                 {searchTerm && (
                     <Button variant="ghost"
@@ -78,7 +83,7 @@ function SelectableList({
             const selectedElement = window.document.getElementById(elementKey);
             selectedElement?.scrollIntoView({ behavior: 'auto', block: 'nearest' });
         }
-    }, [focusedIndex]);
+    }, [focusedIndex, items, getItemKey]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         const itemCount = items.length

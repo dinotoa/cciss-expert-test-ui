@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Maximize } from "lucide-react";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { MapContainer, TileLayer, useMap, ZoomControl } from "react-leaflet";
 
 const outerBounds = new L.LatLngBounds(
@@ -42,7 +42,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ id = "map-panel", className, childr
         // maxBounds={maxBounds}
         zoomControl={false}
         placeholder={<MapPlaceholder />}>
-        <MapZoomControl desiredMBR={desiredMBR} fullMBR={fullMBR}/>
+        <MapZoomControl desiredMBR={desiredMBR} fullMBR={fullMBR} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {children}
       </MapContainer>
@@ -52,14 +52,14 @@ const MapPanel: React.FC<MapPanelProps> = ({ id = "map-panel", className, childr
 
 function MapZoomControl({ desiredMBR, fullMBR }: { fullMBR?: MapRectangle, desiredMBR?: MapRectangle }) {
   const map = useMap()
-  useEffect(() => { fitBounds(desiredMBR) },
-    [desiredMBR, map])
   const fitBounds = (mbr: MapRectangle | undefined) => {
     if (mbr) {
       map.eachLayer(l => l.closePopup())
       map.fitBounds(mbr)
     }
   }
+  useEffect(() => { fitBounds(desiredMBR) },
+    [desiredMBR, map])
   return <>
     <ZoomControl position="bottomright" />
     <Button type="button" variant="secondary" className="absolute top-2 left-2 z-[2000] bg-white"
