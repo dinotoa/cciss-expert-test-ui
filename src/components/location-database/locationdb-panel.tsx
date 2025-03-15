@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import * as turf from "@turf/turf"
 import { ScanSearch } from "lucide-react"
 import dynamic from "next/dynamic"
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import LoadingPanel from "../loading-panel"
 import FullScreenPanel from "../tools/fullscreen-panel"
 import SearchableListPanel from "../tools/searchable-list"
@@ -22,12 +22,12 @@ interface LocationDatabasePanelProps extends React.HTMLProps<HTMLElement> {
 const MapPanel = dynamic(() => import("./locationdb-map"), { ssr: false })
 
 const LocationDatabasePanel: React.FC<LocationDatabasePanelProps> = ({ id = "location-panel", className, locationData }) => {
-  const loadFeatures = async () => {
+  const loadFeatures = useCallback(async () => {
     logInfo("ldb-pnl: loading", locationData?.locations?.length, "features", locationData)
     const features = await getLdbFeatures(locationData.locations ? locationData.locations?.map(l => l.id) : [])
     setFeatures(features)
     setMapMBR(features?.length ? rectangleXyToLonLat(turf.bbox(turf.featureCollection(features))) : undefined)
-  }
+  }, [locationData])
   const [searchTerm, setSearchTerm] = useState("")
   const [features, setFeatures] = useState<LDbFeature[]>()
   const [mapMBR, setMapMBR] = useState<MapRectangle>()
@@ -35,7 +35,7 @@ const LocationDatabasePanel: React.FC<LocationDatabasePanelProps> = ({ id = "loc
 
   useEffect(() => {
     loadFeatures()
-  }, [locationData])
+  }, [loadFeatures])
   const filteredLocations = useMemo(() => features?.length ?
     features?.filter(e => e.properties.name.toLowerCase().includes(searchTerm.toLowerCase())) : [],
     [features, searchTerm])

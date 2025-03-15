@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Loader2, Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ChatSuggestion, { ChatSuggestionType } from "./chat-suggestion";
+import { Textarea } from "../ui/textarea";
 
 type ChatInputProps = React.HTMLProps<HTMLElement> & {
   isLoading: boolean
@@ -29,8 +30,8 @@ const ChatInputPanel: React.FC<ChatInputProps> = ({ id = "chat-input-panel",
     <div id={id} className={cn("flex flex-col gap-2 w-full", className)}>
       <form className="flex flex-row justify-between gap-2 w-full" onSubmit={handleSubmit}>
         <div className="flex gap-1 flex-col w-full rounded ring ring-neutral-100 focus-within:ring-1 focus-within:ring-ring p-2">
-          <textarea ref={areaRef}
-            className="w-full resize-none focus:border-0 focus:outline-none focus:ring-0"
+          <Textarea ref={areaRef}
+            className="w-full resize-none"
             rows={4}
             value={prompt}
             autoFocus={true}

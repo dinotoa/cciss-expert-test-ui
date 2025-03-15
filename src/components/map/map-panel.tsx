@@ -1,7 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button";
 import { MapRectangle } from "@/lib/location-database/geography";
-import { logInfo } from "@/lib/logging";
 import { cn } from "@/lib/utils";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -52,14 +51,14 @@ const MapPanel: React.FC<MapPanelProps> = ({ id = "map-panel", className, childr
 
 function MapZoomControl({ desiredMBR, fullMBR }: { fullMBR?: MapRectangle, desiredMBR?: MapRectangle }) {
   const map = useMap()
-  const fitBounds = (mbr: MapRectangle | undefined) => {
+  const fitBounds = useCallback((mbr: MapRectangle | undefined) => {
     if (mbr) {
       map.eachLayer(l => l.closePopup())
       map.fitBounds(mbr)
     }
-  }
+  }, [map])
   useEffect(() => { fitBounds(desiredMBR) },
-    [desiredMBR, map])
+    [desiredMBR, map, fitBounds])
   return <>
     <ZoomControl position="bottomright" />
     <Button type="button" variant="secondary" className="absolute top-2 left-2 z-[2000] bg-white"
