@@ -42,7 +42,7 @@ const LocationDatabasePanel: React.FC<LocationDatabasePanelProps> = ({ id = "loc
   const fullMBR = useMemo(() => {
     if (filteredLocations?.length) {
       const bbox = turf.bbox(turf.featureCollection(filteredLocations))
-      return [[bbox[1], bbox[0]], [bbox[3], bbox[2]]] as MapRectangle
+      return rectangleXyToLonLat(bbox)
     }
     return undefined
   }, [filteredLocations])
