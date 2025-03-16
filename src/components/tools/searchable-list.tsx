@@ -5,11 +5,14 @@ import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { cn } from "@/lib/utils"
 import { logInfo } from "@/lib/logging"
+import { AnyNaptrRecord } from "node:dns"
+import { get } from "node:http"
 
 interface SelectableListProps extends React.HTMLProps<HTMLElement> {
     items: any[]
     getItemKey: (item: any) => string
-    onSelectionChanged: (selectedItem: any) => void
+    selectedItem: any
+    setSelectedItem: (selectedItem: any) => void
     createItemPanel: (item: any) => React.ReactNode
 }
 
@@ -19,10 +22,9 @@ interface SearchableListPanelProps extends SelectableListProps {
 }
 
 const SearchableListPanel: React.FC<SearchableListPanelProps> = ({ id = "search-panel", className,
-    items, onSelectionChanged, createItemPanel,
+    items, selectedItem, setSelectedItem, createItemPanel,
     searchTerm, setSearchTerm, getItemKey }: SearchableListPanelProps) => {
     return (
-
         <div id={id} className={cn("flex flex-col h-full gap-1 w-full overflow-hidden", className)}>
             <div className="relative flex m-1">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -53,7 +55,8 @@ const SearchableListPanel: React.FC<SearchableListPanelProps> = ({ id = "search-
                 <SelectableList
                     items={items}
                     getItemKey={getItemKey}
-                    onSelectionChanged={onSelectionChanged}
+                    setSelectedItem={setSelectedItem}
+                    selectedItem={selectedItem}
                     createItemPanel={createItemPanel}
                 />
             </ScrollArea>
@@ -63,21 +66,28 @@ const SearchableListPanel: React.FC<SearchableListPanelProps> = ({ id = "search-
 
 function SelectableList({
     items,
-    onSelectionChanged,
+    selectedItem,
+    setSelectedItem,
     className,
     getItemKey,
     createItemPanel
 }: SelectableListProps) {
     const [focusedIndex, setFocusedIndex] = React.useState<number>(-1)
-    const [selectedIndex, setSelectedIndex] = React.useState<number>(-1)
 
     const handleSelect = (idx: number) => {
-        setSelectedIndex(idx)
-        setFocusedIndex(idx)
-        onSelectionChanged(items[idx])
+        logInfo("selected", items[idx])
+        setSelectedItem(items[idx])
     }
-
     useEffect(() => {
+        if (selectedItem) {
+            const idx = items.findIndex((item) => getItemKey(item) === getItemKey(selectedItem))
+            if (idx >= 0) {
+                setFocusedIndex(idx)
+            }
+        }
+    }, [selectedItem, items, getItemKey])
+    useEffect(() => {
+        logInfo("focusedIndex", focusedIndex, "selectedItem", selectedItem)
         if (focusedIndex >= 0) {
             const elementKey = getItemKey(items[focusedIndex])
             const selectedElement = window.document.getElementById(elementKey);
@@ -131,7 +141,7 @@ function SelectableList({
                 onBlur={() => setFocusedIndex(-1)}
             >
                 {items.map((item, index) => {
-                    const isSelected = selectedIndex === index
+                    const isSelected = getItemKey(selectedItem) === getItemKey(item)
                     const isFocused = index === focusedIndex
                     const key = getItemKey(item)
                     return (

@@ -46,9 +46,6 @@ const LocationDatabasePanel: React.FC<LocationDatabasePanelProps> = ({ id = "loc
     }
     return undefined
   }, [filteredLocations])
-  function changeSelectedItem(item: LDbFeature) {
-    setSelectedItem(item)
-  }
   const createItemPanel = (item: LDbFeature) => <LocationDataPanel feature={item} setMapMBR={setMapMBR} />
   return (
     <FullScreenPanel id={id} className={cn("flex flex-col justify-between w-full h-[30rem]", className)}>
@@ -57,7 +54,7 @@ const LocationDatabasePanel: React.FC<LocationDatabasePanelProps> = ({ id = "loc
           ? <LoadingPanel message="Caricamento dati..." />
           : <SearchableListPanel id={`${id}__search`} className="w-[30%] h-full p-1"
             searchTerm={searchTerm} setSearchTerm={setSearchTerm} getItemKey={(item) => item?.properties?.id.toString()}
-            items={filteredLocations} onSelectionChanged={changeSelectedItem}
+            items={filteredLocations} setSelectedItem={setSelectedItem} selectedItem={selectedItem}
             createItemPanel={createItemPanel} />
         }
         <MapPanel id={`${id}__map`} className="w-[70%] h-full"

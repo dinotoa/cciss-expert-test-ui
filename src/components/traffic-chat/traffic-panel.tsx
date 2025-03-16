@@ -19,6 +19,7 @@ interface TrafficPanelProps extends React.HTMLProps<HTMLElement> {
 const MapPanel = dynamic(() => import("./traffic-map"), { ssr: false })
 
 const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, eventData }) => {
+  const [selectedItem, setSelectedItem] = useState<Feature<Geometry, TrafficEventType>>()
   const [searchTerm, setSearchTerm] = useState("")
   const filteredEvents = eventData.events?.features.length ?
     turf.featureCollection(eventData?.events?.features?.filter(e => filterEvent(searchTerm, e)))
@@ -26,17 +27,16 @@ const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, eventDa
 
   const fullMbr = filteredEvents ? rectangleXyToLonLat(turf.bbox(filteredEvents)) : rectangleXyToLonLat([8, 40, 12, 45])
   const [mapMBR, setMapMBR] = useState(fullMbr)
-  const changeSelectedItem = (item: Feature<Geometry, TrafficEventType>) => { }
   const createItemPanel = (item: Feature<Geometry, TrafficEventType>) => <TrafficEventCard event={item} setMapMBR={setMapMBR} />
   return eventData.displayMap && eventData.events?.features.length ?
     <FullScreenPanel id={id} className={cn("flex flex-col justify-between w-full h-[30rem]", className)}>
       <section id={`${id}__container`} className={"relative w-full h-full flex flex-row justify-between items-start gap-1 border"}>
         <SearchableListPanel id={`${id}__search`} className="w-[30%] h-full p-1"
-          searchTerm={searchTerm} setSearchTerm={setSearchTerm} getItemKey={(item) => item?.properties?.id.toString()}
-          items={filteredEvents?.features ?? []} onSelectionChanged={changeSelectedItem}
+          searchTerm={searchTerm} setSearchTerm={setSearchTerm} getItemKey={(item) => item?.properties?.id}
+          items={filteredEvents?.features ?? []} selectedItem={selectedItem} setSelectedItem={setSelectedItem}
           createItemPanel={createItemPanel} />
-        <MapPanel className="w-[75%] h-full" desiredMBR={mapMBR} setMapMBR={setMapMBR} fullMBR={fullMbr}
-          events={filteredEvents}
+        <MapPanel className="w-[70%] h-full" desiredMBR={mapMBR} setMapMBR={setMapMBR} fullMBR={fullMbr}
+          events={filteredEvents} selectedFeature={selectedItem} setSelectedFeature={setSelectedItem} 
           iconUrl="https://luceverde.it/icons/city-map-pin.svg" />
       </section>
     </FullScreenPanel>

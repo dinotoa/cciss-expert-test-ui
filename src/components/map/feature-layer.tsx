@@ -1,20 +1,22 @@
 import { Feature, Geometry, Position } from "geojson"
-import React, { Fragment } from "react"
+import React, { } from "react"
 import { GeoJSON, Marker, Popup } from "react-leaflet"
 import { MapRectangle } from "@/lib/location-database/geography"
 import { logWarn } from "@/lib/logging"
-import { Icon } from "leaflet"
-import { lineString, point } from "@turf/turf"
+import { Icon, Layer } from "leaflet"
+import { multiPoint, point } from "@turf/turf"
 
 interface FeatureLayerProps extends React.HTMLProps<HTMLElement> {
-    features: Feature<Geometry, { id: number }>[]
-    selectedFeature?: Feature<Geometry, { id: number }>
+    features: Feature<Geometry, any>[]
+    selectedFeature?: Feature<Geometry, any>
+    setSelectedFeature?: (feature: Feature<Geometry, any>) => void
     setMapMBR: (mbr: MapRectangle) => void
     createIcon: (feature: Feature<Geometry, any>) => Icon
     createPanel: (Feature: Feature<Geometry, any>, setMapMBR: (mbr: MapRectangle) => void) => React.ReactNode
 }
 
-const FeatureLayer: React.FC<FeatureLayerProps> = ({ features, selectedFeature, setMapMBR, createPanel, createIcon }) => {
+const FeatureLayer: React.FC<FeatureLayerProps> = ({ features, selectedFeature, setSelectedFeature,
+    setMapMBR, createPanel, createIcon }) => {
     return features?.map(feat => {
         const selected = feat.properties.id === selectedFeature?.properties.id
         const icon = createIcon(feat)
@@ -22,17 +24,24 @@ const FeatureLayer: React.FC<FeatureLayerProps> = ({ features, selectedFeature, 
         switch (feat.geometry.type) {
             case "Polygon":
             case "MultiPolygon":
-                return <PolygonLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup} selected={selected} />
+                return <PolygonLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                    selected={selected} setSelectedFeature={setSelectedFeature} />
 
             case "Point":
-                return <PointLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup} selected={selected} />
+                return <PointLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                    selected={selected} setSelectedFeature={setSelectedFeature} />
 
             case "LineString":
+                return <LineLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                    selected={selected} setSelectedFeature={setSelectedFeature} />
+
             case "MultiPoint":
-                return <LineLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup} selected={selected} />
+                return <MultilineLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                    selected={selected} setSelectedFeature={setSelectedFeature} />
 
             case "MultiLineString":
-                return <MultilineLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup} selected={selected} />
+                return <MultilineLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                    selected={selected} setSelectedFeature={setSelectedFeature} />
 
             default:
                 logWarn("FeatureLayer: unknown geometry type", feat.geometry.type)
@@ -43,50 +52,70 @@ const FeatureLayer: React.FC<FeatureLayerProps> = ({ features, selectedFeature, 
 
 interface FeaturePopupProps extends React.HTMLProps<HTMLElement> {
     feature: Feature<Geometry, any>
+    onEachFeature?: (feature: Feature<Geometry, any>, layer: Layer) => void
     selected: boolean
+    setSelectedFeature?: (feature: Feature<Geometry, any>) => void
     icon: Icon
     popup: React.ReactNode
 }
 
-const PointLayer: React.FC<FeaturePopupProps> = ({ feature, icon, popup }) => {
+const PointLayer: React.FC<FeaturePopupProps> = ({ feature, icon, popup, setSelectedFeature }) => {
     return feature.geometry.type === "Point" ?
-        <Marker key={feature.properties.id} position={[feature.geometry.coordinates[1], feature.geometry.coordinates[0]]} icon={icon}>
+        <Marker key={feature.properties.id} eventHandlers={{ click: () => setSelectedFeature && setSelectedFeature(feature) }}
+            position={[feature.geometry.coordinates[1], feature.geometry.coordinates[0]]} icon={icon}>
             {popup}
         </Marker>
         : null
 }
 
-const MultilineLayer: React.FC<FeaturePopupProps> = ({ feature, selected, icon, popup }) => {
+const MultilineLayer: React.FC<FeaturePopupProps> = ({ feature, selected, icon, popup, setSelectedFeature }) => {
     return feature.geometry.type === "MultiLineString" ?
-        <Fragment key={feature.properties.id}>
-            <GeoJSON data={feature} style={{ color: selected ? "red" : "blue" }}>
+        <>
+            <GeoJSON data={feature} style={{ color: selected ? "red" : "blue" }}
+                onEachFeature={(f, l) => setSelectedFeature && l.on("click", () => setSelectedFeature(f))} >
                 {popup}
             </GeoJSON>
             {feature.geometry.coordinates
-                .flatMap((coord, idx) => <LineLayer key={`${feature.properties.id}-${idx}`} selected={selected}
-                    feature={lineString(coord, feature.properties)} popup={popup} icon={icon} />)
+                .flatMap((coord, idx) => <MultiPointLayer key={`${feature.properties.id}-${idx}`}
+                    selected={selected} setSelectedFeature={setSelectedFeature}
+                    popup={popup} feature={multiPoint(coord, feature.properties)} icon={icon} />)
             }
-        </Fragment>
+        </>
         : null
 }
 
-const LineLayer: React.FC<FeaturePopupProps> = ({ feature, icon, popup, selected }) => {
-    return feature.geometry.type === "LineString" || feature.geometry.type === "MultiPoint" ?
-        <Fragment key={feature.properties.id}>
-            <GeoJSON data={feature}>
+const LineLayer: React.FC<FeaturePopupProps> = ({ feature, icon, popup, selected, setSelectedFeature }) => {
+    return feature.geometry.type === "LineString" ?
+        <>
+            <GeoJSON data={feature} style={{ color: selected ? "red" : "blue" }}
+                onEachFeature={(f, l) => setSelectedFeature && l.on("click", () => setSelectedFeature(f))} >
                 {popup}
             </GeoJSON>
             {feature.geometry.coordinates
                 .map((coord: Position, idx: number) => <PointLayer key={`${feature.properties.id}-${idx}`}
-                    selected={selected} popup={popup} feature={point(coord, feature.properties)} icon={icon} />
+                    selected={selected} setSelectedFeature={setSelectedFeature}
+                    popup={popup} feature={point(coord, feature.properties)} icon={icon} />
                 )}
-        </Fragment>
+        </>
         : null
 }
 
-const PolygonLayer: React.FC<FeaturePopupProps> = ({ feature, icon, popup, selected }) => {
+const MultiPointLayer: React.FC<FeaturePopupProps> = ({ feature, icon, popup, selected, setSelectedFeature }) => {
+    return feature.geometry.type === "MultiPoint" ?
+        <>
+            {feature.geometry.coordinates
+                .map((coord: Position, idx: number) => <PointLayer key={`${feature.properties.id}-${idx}`}
+                    selected={selected} setSelectedFeature={setSelectedFeature}
+                    popup={popup} feature={point(coord, feature.properties)} icon={icon} />
+                )}
+        </>
+        : null
+}
+
+const PolygonLayer: React.FC<FeaturePopupProps> = ({ feature, icon, popup, selected, setSelectedFeature }) => {
     return feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon" ?
-        <GeoJSON data={feature} style={{ color: selected ? "red" : "blue" }}>
+        <GeoJSON data={feature} style={{ color: selected ? "red" : "blue" }}
+            onEachFeature={(f, l) => setSelectedFeature && l.on("click", () => setSelectedFeature(f))} >
             {popup}
         </GeoJSON>
         : null
