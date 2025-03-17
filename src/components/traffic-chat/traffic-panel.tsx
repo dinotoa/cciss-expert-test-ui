@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Feature, Geometry } from "geojson";
 import * as turf from "@turf/turf";
@@ -10,33 +10,52 @@ import FullScreenPanel from "../tools/fullscreen-panel";
 import SearchableListPanel from "../tools/searchable-list";
 import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools";
 import { MapRectangle, rectangleXyToLonLat } from "@/lib/location-database/geography";
-import { TrafficEventType } from "@/lib/traffic-database/traffic-database-types";
+import { TrafficDataResponse, TrafficEventType } from "@/lib/traffic-database/traffic-database-types";
+import { fetchTrafficDataById } from "@/lib/traffic-database/traffic-database";
+import LoadingPanel from "../loading-panel";
 
 interface TrafficPanelProps extends React.HTMLProps<HTMLElement> {
-  eventData: TrafficEventToolResponse
+  trafficToolResponse: TrafficEventToolResponse
 }
 
 const MapPanel = dynamic(() => import("./traffic-map"), { ssr: false })
 
-const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, eventData }) => {
+const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, trafficToolResponse }) => {
+  const loadEvents = useCallback(async () => {
+    const eventData = await fetchTrafficDataById(trafficToolResponse?.events?.map((e) => e.id) ?? [])
+    if (eventData) {
+      setEventData(eventData)
+      if (eventData?.data) {
+        setMapMBR(rectangleXyToLonLat(turf.bbox(turf.featureCollection(eventData.data.features))))
+      }
+    }
+  }, [trafficToolResponse])
+  useEffect(() => {
+    loadEvents()
+  }, [loadEvents])
+
+  const [eventData, setEventData] = useState<TrafficDataResponse>()
   const [selectedItem, setSelectedItem] = useState<Feature<Geometry, TrafficEventType>>()
   const [searchTerm, setSearchTerm] = useState("")
-  const filteredEvents = eventData.events?.features.length ?
-    turf.featureCollection(eventData?.events?.features?.filter(e => filterEvent(searchTerm, e)))
+  const filteredEvents = eventData?.data?.features.length ?
+    turf.featureCollection(eventData?.data?.features?.filter(e => filterEvent(searchTerm, e)))
     : undefined
 
   const fullMbr = filteredEvents ? rectangleXyToLonLat(turf.bbox(filteredEvents)) : rectangleXyToLonLat([8, 40, 12, 45])
   const [mapMBR, setMapMBR] = useState(fullMbr)
   const createItemPanel = (item: Feature<Geometry, TrafficEventType>) => <TrafficEventCard event={item} setMapMBR={setMapMBR} />
-  return eventData.displayMap && eventData.events?.features.length ?
+  return trafficToolResponse.displayMap && eventData?.data?.features.length ?
     <FullScreenPanel id={id} className={cn("flex flex-col justify-between w-full h-[30rem]", className)}>
       <section id={`${id}__container`} className={"relative w-full h-full flex flex-row justify-between items-start gap-1 border"}>
-        <SearchableListPanel id={`${id}__search`} className="w-[30%] h-full p-1"
-          searchTerm={searchTerm} setSearchTerm={setSearchTerm} getItemKey={(item) => item?.properties?.id}
-          items={filteredEvents?.features ?? []} selectedItem={selectedItem} setSelectedItem={setSelectedItem}
-          createItemPanel={createItemPanel} />
+        {eventData === undefined
+          ? <LoadingPanel message="Caricamento dati..." />
+          : <SearchableListPanel id={`${id}__search`} className="w-[30%] h-full p-1"
+            searchTerm={searchTerm} setSearchTerm={setSearchTerm} getItemKey={(item) => item?.properties?.id}
+            items={filteredEvents?.features ?? []} selectedItem={selectedItem} setSelectedItem={setSelectedItem}
+            createItemPanel={createItemPanel} />
+        }
         <MapPanel className="w-[70%] h-full" desiredMBR={mapMBR} setMapMBR={setMapMBR} fullMBR={fullMbr}
-          events={filteredEvents} selectedFeature={selectedItem} setSelectedFeature={setSelectedItem} 
+          events={filteredEvents} selectedFeature={selectedItem} setSelectedFeature={setSelectedItem}
           iconUrl="https://luceverde.it/icons/city-map-pin.svg" />
       </section>
     </FullScreenPanel>

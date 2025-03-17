@@ -17,7 +17,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({ id, className, response, i
   logInfo(toolName, toolResult)
   switch (toolName) {
     case "trafficEventSelectionTool":
-      return <TrafficEventPanel id={id} className={className} eventData={toolResult as TrafficEventToolResponse} />
+      return <TrafficEventPanel id={id} className={className} trafficToolResponse={toolResult as TrafficEventToolResponse} />
     case AREA_INFO_TOOL_NAME:
     case AREA_CHILDREN_TOOL_NAME:
       return <LocationDatabasePanel id={id} className={className} locationData={toolResult as LocationDbResponseType} />

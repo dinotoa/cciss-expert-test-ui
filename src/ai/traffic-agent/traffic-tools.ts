@@ -11,7 +11,7 @@ import { trafficSelectionAgent } from './traffic-selection-agent'
 
 export interface TrafficEventToolResponse {
   error?: string
-  events?: FeatureCollection<Geometry, TrafficEventType>
+  events?: TrafficEventType[]
   numberOfEvents: number
   displayMap: boolean
 }
@@ -45,7 +45,7 @@ const trafficSelectionTool = createTool({
         })
         logInfo(TRAFFIC_TOOL_NAME, "final selection is", response.data.features.length, "traffic events")
       }
-      return { displayMap, events: response.data, numberOfEvents: response.data.features.length, error: response.error }
+      return { displayMap, events: response.data.features.map(event => event.properties), numberOfEvents: response.data.features.length, error: response.error }
     }
     logErr(TRAFFIC_TOOL_NAME, "error:", response.error)
     return { displayMap, error: response.error, numberOfEvents: 0 }

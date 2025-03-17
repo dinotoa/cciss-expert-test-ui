@@ -1,8 +1,10 @@
+"use server"
 import { fetchTrafficDataBySlug } from "@/lib/traffic-database/luceverde-api";
 import * as turf from '@turf/turf';
 import { Geometry } from "geojson";
 import { getLocationsByTypeName } from "../location-database/location-db";
 import { TopicArrayType, TrafficDataResponse } from "./traffic-database-types";
+import { logInfo } from "../logging";
 
 
 export async function fetchTrafficInfoByFeatures(topics: TopicArrayType): Promise<TrafficDataResponse> {
@@ -17,6 +19,20 @@ export async function fetchTrafficInfoByFeatures(topics: TopicArrayType): Promis
         return { data: { type: "FeatureCollection", features: contanedFeatures } }
     }
     return {}
+}
+
+export async function fetchTrafficDataById(ids: string[]): Promise<TrafficDataResponse> {
+    logInfo("fetchTrafficDataById: fetching", ids.length, "events by id")
+    const idSet = new Set(ids)
+    const trafficDataResponse = await fetchTrafficDataBySlug("italia")
+    if (trafficDataResponse.error) {
+        return { error: trafficDataResponse.error }
+    }
+    if (trafficDataResponse.data?.features?.length) {
+        const contanedFeatures = trafficDataResponse.data?.features.filter(f => idSet.has(f.properties.id))
+        return { data: turf.featureCollection(contanedFeatures) }
+    }
+    return { data: turf.featureCollection([]) }
 }
 
 function containedInAny(geometries: Geometry[], geometry: Geometry) {
