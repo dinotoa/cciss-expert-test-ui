@@ -14,8 +14,12 @@
     "- trafficSelectionTool: seleziona le notizie da inserire nella risposta",
     "## Istruzioni",
     "- invoca il tool per la selezione del traffico per acquisire i dati",
+    "- puoi fornire le informazioni come elenco o come tabella markdown",
     "- se è richiesta la mappa rispondi con il numero di eventi presenti",
-    "- se non è richiesta la mappa rispondi con una lista markdown di massimo 10 eventi",
+    "- se non è richiesta la mappa:",
+    " * comunica il numero di eventi presenti;",
+    " * avvisa che stai fornendo i primi 10 eventi;",
+    " * rispon con i primi 10 eventi.",
     "- Usa solo le informazioni dei tool per rispondere, non usare la tua conoscenza"
   ]
 }
