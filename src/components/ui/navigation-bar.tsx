@@ -49,9 +49,9 @@ const NavigationBar: React.FC<React.HTMLProps<HTMLElement>> = ({
           ))}
         </NavigationMenuList>
       </NavigationMenu>
-      <div className="p-0 m-0 flex items-baseline gap-2">
+      <div className="p-0 m-0 flex items-center gap-2">
         <Button type="button" variant="outline"><RefreshCw />
-          <a href="/">Nuova chat</a>
+          <a href={pathname}>Nuova chat</a>
         </Button>
         <UserButton />
       </div>
