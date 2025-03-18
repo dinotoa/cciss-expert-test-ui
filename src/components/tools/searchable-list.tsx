@@ -1,12 +1,9 @@
-import React, { useEffect } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
 import { Search, X } from "lucide-react"
+import React, { useEffect } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
-import { cn } from "@/lib/utils"
-import { logInfo } from "@/lib/logging"
-import { AnyNaptrRecord } from "node:dns"
-import { get } from "node:http"
 
 interface SelectableListProps extends React.HTMLProps<HTMLElement> {
     items: any[]
@@ -74,10 +71,6 @@ function SelectableList({
 }: SelectableListProps) {
     const [focusedIndex, setFocusedIndex] = React.useState<number>(-1)
 
-    const handleSelect = (idx: number) => {
-        logInfo("selected", items[idx])
-        setSelectedItem(items[idx])
-    }
     useEffect(() => {
         if (selectedItem) {
             const idx = items.findIndex((item) => getItemKey(item) === getItemKey(selectedItem))
@@ -86,8 +79,8 @@ function SelectableList({
             }
         }
     }, [selectedItem, items, getItemKey])
+
     useEffect(() => {
-        logInfo("focusedIndex", focusedIndex, "selectedItem", selectedItem)
         if (focusedIndex >= 0) {
             const elementKey = getItemKey(items[focusedIndex])
             const selectedElement = window.document.getElementById(elementKey);
@@ -119,7 +112,7 @@ function SelectableList({
             case " ": // Space
                 e.preventDefault()
                 if (focusedIndex >= 0) {
-                    handleSelect(focusedIndex)
+                    setSelectedItem(items[focusedIndex])
                 }
                 break
         }
@@ -159,7 +152,7 @@ function SelectableList({
                                 !isSelected && isFocused && "bg-accent text-accent-foreground",
                                 !isSelected && !isFocused && "hover:bg-accent hover:text-accent-foreground"
                             )}
-                            onClick={() => handleSelect(index)}
+                            onClick={() => setSelectedItem(items[index])}
                         >
                             {createItemPanel(item)}
                         </li>

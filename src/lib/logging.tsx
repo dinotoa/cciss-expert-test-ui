@@ -3,9 +3,9 @@ export function logInfo(...args: unknown[]) {
 }
 
 export function logWarn(...args: unknown[]) {
-    console.warn(new Date().toISOString(), "INFO:", ...args)
+    console.warn(new Date().toISOString(), "WARN:", ...args)
 }
 
 export function logErr(...args: unknown[]) {
-    console.error(new Date().toISOString(), "INFO:", ...args)
+    console.error(new Date().toISOString(), "ERR:", ...args)
 }
