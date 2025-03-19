@@ -1,13 +1,18 @@
 "use client"
-
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Play, Square, Volume2 } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Slider } from "@/components/ui/slider"
 
-export default function SpeechSynthesisPlayer({ text, onClose }: { text: string, onClose: () => void}) {
+interface SpeechSynthesisPlayerProps extends React.HTMLProps<HTMLElement> {
+  text: string
+  onClose: () => void
+}
+
+const SpeechSynthesisPlayer: React.FC<SpeechSynthesisPlayerProps> = ({ id, className, text, onClose }) => {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
   const [selectedVoice, setSelectedVoice] = useState<string>("")
   const [volume, setVolume] = useState<number>(1)
@@ -59,7 +64,7 @@ export default function SpeechSynthesisPlayer({ text, onClose }: { text: string,
         utteranceRef.current.onend = null
       }
     }
-  }, [])
+  }, [utteranceRef.current])
 
   // Clean up on unmount
   useEffect(() => {
@@ -132,7 +137,7 @@ export default function SpeechSynthesisPlayer({ text, onClose }: { text: string,
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card id={id} className={cn("w-full max-w-2xl mx-auto", className)}>
       <CardContent className="space-y-4">
         <div className="space-y-2 flex gap-2 items-baseline">
           <label htmlFor="voice-select" className="text-sm font-medium">
@@ -206,7 +211,7 @@ export default function SpeechSynthesisPlayer({ text, onClose }: { text: string,
             )}
           </Button>
           <Button variant="outline" type="button" onClick={onClose}>
-            Close
+            Chiudi
           </Button>
         </div>
       </CardFooter>
@@ -214,3 +219,4 @@ export default function SpeechSynthesisPlayer({ text, onClose }: { text: string,
   )
 }
 
+export default SpeechSynthesisPlayer

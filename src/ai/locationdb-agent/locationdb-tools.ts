@@ -12,6 +12,13 @@ interface LocationData {
     name: string,
 }
 
+const ZLocationData = z.object({
+    id: z.number().describe("identificatore unico della località"),
+    parentAreaId: z.number().describe("identificatore unico della area padre della località"),
+    type: ZLdbFeatureTypeEnum.describe("tipo della località"),
+    name: z.string().describe("nome della località"),
+})
+
 const ZLocationInformationRequest = z.object({
     showMap: z.boolean().default(false).describe("true se l'utente richiede la mappa"),
     locationType: ZLdbFeatureTypeEnum.describe("tipo della località scelta dall'utente"),
@@ -27,10 +34,19 @@ const ZLocationInLocationRequest = z.object({
 
 const ZLocationDbRequest = z.object({
     locationType: ZLdbFeatureTypeEnum.describe("tipo della località scelta dall'utente"),
-    locationCode: z.string().optional().describe("codice della località"),
+    locationCode: z.string().optional().describe("codice della strada extraurbana o dell'autostrada"),
     locationName: z.string().optional().describe("nome della località"),
     relatedLocationType: ZLdbFeatureTypeEnum.optional().describe("tipo delle località children"),
 })
+
+const ZRoadInformationRequest = z.object({
+    showMap: z.boolean().default(false).describe("true se l'utente richiede la mappa"),
+    locationType: ZLdbFeatureTypeEnum.describe("tipo della località scelta dall'utente"),
+    roadNumber: z.string().describe("numero della strada, exempio: A1, SS23, SR43"),
+    roadName: z.string().describe("nome della strada"),
+    areaName: z.string().optional().describe("nome della città, provincia o regione dove si trova la strada"),
+})
+
 
 export interface LocationDbResponseType {
     errorMessage?: string
@@ -72,7 +88,7 @@ const areaChildrenTool = tool({
                 return { errorMessage: `Nessuna ${parentLocationType} trovata per ${parentLocationName}` }
             }
             const data = parentData.flatMap(p => getAreaChildren(p, childLocationType))
-            .sort((a, b) => a.properties.name.localeCompare(b.properties.name))
+                .sort((a, b) => a.properties.name.localeCompare(b.properties.name))
             logInfo(`${TOOL_NAME}: returning ${data.length} locations`)
             return { showMap, locations: data.map(mapLocationData) }
         } catch (error) {
@@ -80,6 +96,30 @@ const areaChildrenTool = tool({
             return { errorMessage: getErrorMessage(error) }
         }
     }
+})
+
+const roadInfoTool = tool({
+    description: "fornisce informazioni su una strada o un indirizzo",
+    parameters: ZRoadInformationRequest.describe("i paremetri per la ricerca della strada o dell'indirizzo"),
+    execute: async ({ showMap, locationType, roadNumber, roadName, areaName }): Promise<LocationDbResponseType> => {
+        const TOOL_NAME = "roadInfoTool:"
+        try {
+            logInfo(TOOL_NAME, "type:", locationType, "number:", roadNumber, "name:", roadName, "area:", areaName)
+            const roads = getLocationsByTypeName(locationType, roadName)
+            
+            return { showMap, locations: [] }
+        } catch (error) {
+            logErr(`${TOOL_NAME}: ${error}`)
+            return { errorMessage: getErrorMessage(error) }
+        }
+    }
+})
+
+const locationChooseTool = tool({
+    description: "consente all'utente di scegliere una località",
+    parameters: z.object({
+        locations: z.array(ZLocationData).describe("elenco delle località tra cui scegliere")
+    }).describe("i paremetri per la scelta della località")
 })
 
 function mapLocationData(location: LDbFeature): LocationData {
@@ -93,7 +133,9 @@ function mapLocationData(location: LDbFeature): LocationData {
 
 const allTools = {
     areaInfoTool,
-    areaChildrenTool
+    areaChildrenTool,
+    roadInfoTool,
+    locationChooseTool
 }
 
 export default allTools

@@ -1,92 +1,109 @@
-import React from "react"
-import { Message } from "ai/react"
+import React, { useMemo } from "react"
+import CopyButton from "../copy-button"
 import { cn, markdownToText } from "@/lib/utils"
+import MarkdownPanel from "@/components/ui/markdown-panel"
 import { Button } from "@/components/ui/button"
-import { MarkdownPanel } from "@/components/ui/markdown-panel"
-import { BotMessageSquare, Files, FileX, User, Volume2 } from "lucide-react"
-import { AgentAnnotations, INFO_AGENT_NAME } from "@/ai/ai-library"
+import { Popover } from "@radix-ui/react-popover"
+import { Message } from "ai/react"
+import { BotMessageSquare, Loader2, Trash2, User, Volume2 } from "lucide-react"
+import { PopoverContent, PopoverTrigger } from "../ui/popover"
 import SpeechSynthesisPlayer from "../tools/tts-player"
-import { ToolPanel } from "./chat-tools"
-import { ToolInvocation, ToolResult, Tool } from "ai"
+import ChatToolCallsPanel from "./chat-tool-calls"
+import ChatToolsResultPanel from "./chat-tool-result"
 
-type ChatMessageProps = React.HTMLProps<HTMLElement> & {
+interface MessageDataProps extends React.HTMLProps<HTMLElement> {
   message: Message
-  isLoading: boolean,
-  stop: () => void
-  copyMessage: () => void
+}
+
+interface AgentResponseProps extends MessageDataProps {
+  message: Message
   deleteMessage: () => void
+  addToolResult: (result: any) => void
+}
+
+interface ChatMessageProps extends AgentResponseProps {
+  isLoading: boolean
 }
 
 const ChatResponsePanel: React.FC<ChatMessageProps> = ({ id = "chat-message-panel", className, message,
-  stop, isLoading, copyMessage, deleteMessage }) => {
-  return (
-    <div key={message.id} className={cn("flex flex-col gap-2 w-full justify-start", className)}>
-      <div className="flex flex-row gap-2 justify-start items-center w-full">
-        <div>{message.role === 'user' ? <User /> : <BotMessageSquare />}</div>
-        <div className="w-full">
-          {message.role === 'user'
-            ? <UserPromptPanel prompt={message.content} createdAt={message.createdAt?.toDateString()} />
-            : <MarkdownPanel content={message.content} />
-          }
-          {message.parts?.map(part => (
-            !isLoading && part.type === "tool-invocation" && (part.toolInvocation as ToolInvocation).state === "result" ?
-              <ToolPanel key={(part.toolInvocation as ToolInvocation).toolCallId}
-                response={message.content ?? ""} 
-                invocation={part.toolInvocation as ToolInvocation}
-                />
-              : null
-          ))}
-          {message.role !== 'user' && <MessageToolbar message={message} isLoading={isLoading} stop={stop}
-            copyMessage={copyMessage}
-            deleteMessage={deleteMessage} />
-          }
-        </div>
-      </div>
+  isLoading, deleteMessage, addToolResult }) => {
+  return isLoading ? null :
+    <div key={message.id} className={cn("flex flex-row gap-2 justify-start items-start w-full", className)}>
+      <MessageIcon isLoading={isLoading} message={message} />
+      {message.role === 'user'
+        ? <UserPromptPanel message={message} />
+        : <AgentResponsePanel message={message} addToolResult={addToolResult} deleteMessage={deleteMessage} />
+      }
     </div>
-  )
 }
 
-interface UserPromptPanelProps extends React.HTMLProps<HTMLElement> {
-  prompt: string
-  createdAt: string | undefined
+const AgentResponsePanel: React.FC<AgentResponseProps> = ({ id = "agent-response-panel", className,
+  message, addToolResult, deleteMessage }) => {
+  return <div className="w-full">
+    <AgentResultsPanel message={message} />
+    <ChatToolsResultPanel message={message} />
+    <ChatToolCallsPanel message={message} addToolResult={addToolResult} />
+    <MessageToolbar message={message} deleteMessage={deleteMessage} />
+  </div>
+
 }
 
-const UserPromptPanel: React.FC<UserPromptPanelProps> = ({ id, className, prompt, createdAt }) => {
-  return <div id={id} className={cn("w-100 flex justify-between align-baseline", className)}>
-    <p className="w-fit p-2 rounded-md flex-grow-0 bg-neutral-200">{prompt}</p>
-    <p className="flex-grow-0 p-2 text-neutral-500">{createdAt}</p>
+const UserPromptPanel: React.FC<MessageDataProps> = ({ id = "user-prompt-panel", className, message }) => {
+  return <div id={id} className={cn("w-full flex justify-between align-baseline", className)}>
+    <div className="flex flex-row gap-2 justify-start items-center">
+      <p className="w-fit p-2 rounded-md flex-grow-0 bg-accent text-accent-foreground">{message.content}</p>
+      <CopyButton value={message.content} />
+    </div>
+    <p className="flex-grow-0 p-2 text-neutral-500">{message.createdAt?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
   </div>
 }
 
-const TTS_AGENTS = [INFO_AGENT_NAME]
-
-const MessageToolbar: React.FC<ChatMessageProps> = ({ id = "chat-toolbar-panel", className, message, isLoading, copyMessage, deleteMessage }) => {
-  const annotations: AgentAnnotations | undefined = message.annotations && message.annotations[0] ? message.annotations[0] as unknown as AgentAnnotations : undefined;
-  const agent = annotations?.agent ?? "-----"
-  const [ttsOpen, setTtsOpen] = React.useState(false)
-  
+const AgentResultsPanel: React.FC<MessageDataProps> = ({ id = "agent-results-panel", className, message }) => {
+  const messageToCopy = useMemo(() => markdownToText(message.content ?? ""), [message.content])
+  const [isOpen, setOpen] = React.useState(false)
   return (
-    <div className={cn("flex flex-col gap-2 justify-start items-start px-2 pb-4", className)}>
-      {!isLoading && <>
-        {ttsOpen &&
-          <SpeechSynthesisPlayer text={markdownToText(message.content)} onClose={() => setTtsOpen(false)}/>
-        }
-        <div className="flex flex-row gap-2 justify-start items-center">
-          <Button type="button" variant="outline" onClick={copyMessage}>
-            <Files />Copia
-          </Button>
-          <Button type="button" variant="outline" onClick={deleteMessage}>
-            <FileX />Cancella
-          </Button>
-          {TTS_AGENTS.includes(agent) &&
-            <Button type="button" variant="outline" onClick={() => setTtsOpen(!ttsOpen)} >
-              <Volume2 />{ttsOpen ? "Chiudi TTS": "Apri TTS"}
-            </Button>
-          }
+    <div id={id} className={cn(className, "flex flex-row gap-3 w-full justify-between items-start", className)}>
+      <MarkdownPanel className="w-auto" content={message.content} />
+      {messageToCopy?.length ?
+        <div className="flex flex-row gap-1 justify-start items-center flex-wrap flex-shrink">
+          <Popover open={isOpen} onOpenChange={setOpen} >
+            <PopoverTrigger asChild>
+              <Button variant={isOpen ? "default" : "outline"} size="icon" onClick={() => setOpen(!isOpen)}><Volume2 /></Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[25rem]" side="left">
+              <SpeechSynthesisPlayer className="border-0 shadow-none p-0" text={messageToCopy} onClose={() => setOpen(false)} />
+            </PopoverContent>
+          </Popover>
+          <CopyButton value={message.content} />
         </div>
-      </>
+        : null
       }
     </div>
   )
 }
+
+interface MessageToolbarProps extends React.HTMLProps<HTMLElement> {
+  message: Message
+  deleteMessage: () => void
+}
+
+const MessageToolbar: React.FC<MessageToolbarProps> = ({ id = "chat-toolbar-panel", className, message, deleteMessage }) => {
+  return (
+    <div id={id} className={cn("my-2 flex flex-col gap-2 justify-start items-start", className)}>
+      <Button type="button" variant="destructive" onClick={deleteMessage}>
+        <Trash2 />Elimina
+      </Button>
+    </div>
+  )
+}
+
+interface MessageIconProps extends MessageDataProps {
+  isLoading: boolean
+  message: Message
+}
+
+const MessageIcon: React.FC<MessageIconProps> = ({ isLoading, message }) => {
+  return isLoading ? <Loader2 className="animate-spin" /> : (message.role === 'user' ? <User /> : <BotMessageSquare />)
+}
+
 export default ChatResponsePanel;

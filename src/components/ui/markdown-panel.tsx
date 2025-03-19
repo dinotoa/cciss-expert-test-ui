@@ -1,16 +1,15 @@
 "use client"
-
 import type React from "react"
-import { cn } from "@/lib/utils"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from 'remark-gfm'
 import remarkImages from 'remark-images'
+import { cn } from "@/lib/utils"
 
 interface MarkdownDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
   content: string
 }
 
-export function MarkdownPanel({ className, content, ...props }: MarkdownDisplayProps) {
+function MarkdownPanel({ className, content, ...props }: MarkdownDisplayProps) {
   return (
     <ReactMarkdown className={cn("w-full", className)} {...props}
       components={{
@@ -37,3 +36,4 @@ export function MarkdownPanel({ className, content, ...props }: MarkdownDisplayP
   )
 }
 
+export default MarkdownPanel

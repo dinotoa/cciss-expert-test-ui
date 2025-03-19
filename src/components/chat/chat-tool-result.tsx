@@ -1,20 +1,31 @@
-import { AREA_CHILDREN_TOOL_NAME, AREA_INFO_TOOL_NAME, TRAFFIC_TOOL_NAME } from "@/ai/ai-library"
-import TrafficEventPanel from "../traffic-chat/traffic-panel"
-import { logInfo } from "@/lib/logging"
-import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools"
-import { ToolInvocation } from "ai"
-import LocationDatabasePanel from "../location-database/locationdb-panel"
+import { Message, ToolInvocation } from "ai"
+import { AREA_CHILDREN_TOOL_NAME, AREA_INFO_TOOL_NAME } from "@/ai/ai-library"
 import { LocationDbResponseType } from "@/ai/locationdb-agent/locationdb-tools"
+import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools"
+import LocationDatabasePanel from "../location-database/locationdb-panel"
+import TrafficEventPanel from "../traffic-chat/traffic-panel"
 
-export interface ToolPanelProps extends React.HTMLProps<HTMLElement> {
-  response: string
+interface ToolResultPanelProps extends React.HTMLProps<HTMLElement> {
+  message: Message
+}
+
+const ChatToolsResultPanel: React.FC<ToolResultPanelProps> = ({ id, className, message }) => {
+  return message.parts?.map(part => (
+    part.type === "tool-invocation" && (part.toolInvocation as ToolInvocation).state === "result" ?
+      <ToolResultDetailsPanel key={(part.toolInvocation as ToolInvocation).toolCallId}
+        invocation={part.toolInvocation as ToolInvocation}
+      />
+      : null
+  ))
+}
+
+interface ToolResultDetailsPanelProps extends React.HTMLProps<HTMLElement> {
   invocation: ToolInvocation
 }
 
-export const ToolPanel: React.FC<ToolPanelProps> = ({ id, className, response, invocation }) => {
+const ToolResultDetailsPanel: React.FC<ToolResultDetailsPanelProps> = ({ id, className, invocation }) => {
   const toolName = invocation.toolName
   const toolResult = invocation.state === "result" ? invocation.result : null
-  logInfo(toolName, toolResult)
   switch (toolName) {
     case "trafficEventSelectionTool":
       return <TrafficEventPanel id={id} className={className} trafficToolResponse={toolResult as TrafficEventToolResponse} />
@@ -40,3 +51,4 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({ id, className, response, i
   return null
 }
 
+export default ChatToolsResultPanel
