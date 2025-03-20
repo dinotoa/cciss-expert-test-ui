@@ -40,6 +40,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ id = "map-panel", className, childr
         bounds={desiredMBR ? desiredMBR : outerBounds}
         // maxBounds={maxBounds}
         zoomControl={false}
+        preferCanvas={true}
         placeholder={<MapPlaceholder />}>
         <MapZoomControl desiredMBR={desiredMBR} fullMBR={fullMBR} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
