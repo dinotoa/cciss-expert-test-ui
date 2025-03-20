@@ -6,33 +6,47 @@ import { LanguageModelUsage } from "ai";
 import { Loader2, Send, Trash2 } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import ChatSuggestion, { ChatSuggestionType } from "./chat-suggestion";
+import ChatRecents from "./chat-history";
+import { useLocalStorageStack } from "@/hooks/local-storage";
 
 type ChatInputProps = React.HTMLProps<HTMLElement> & {
   isLoading: boolean
   toolCallsPending: boolean
   usage: LanguageModelUsage | undefined
   prompt: string
+  historyKey: string
   suggestions: ChatSuggestionType[]
-  setPrompt: React.Dispatch<React.SetStateAction<string>>
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => void,
   stop: () => void,
+  setPrompt: React.Dispatch<React.SetStateAction<string>>
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void,
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => void,
 }
 
 const ChatInputPanel: React.FC<ChatInputProps> = ({ id = "chat-input-panel",
   className, isLoading, toolCallsPending, usage, stop,
-  prompt, setPrompt, handleInputChange, handleSubmit, suggestions }) => {
+  prompt, setPrompt, handleInputChange, handleSubmit, suggestions, historyKey }) => {
   const [suggestionOpen, setSuggestionOpen] = React.useState(false)
+  const [historyOpen, setHistoryOpen] = React.useState(false)
   const areaRef = React.useRef<HTMLTextAreaElement>(null)
   const setSuggestionOpenAndFocus: React.Dispatch<React.SetStateAction<boolean>> = (open) => {
     setSuggestionOpen(open)
+    setHistoryOpen(false)
     if (!open) {
       areaRef.current?.focus()
     }
   }
+  const setHistoryOpenAndFocus: React.Dispatch<React.SetStateAction<boolean>> = (open) => {
+    setHistoryOpen(open)
+    setSuggestionOpen(false)
+    if (!open) {
+      areaRef.current?.focus()
+    }
+  }
+  const { values, pushValue, clearStack } = useLocalStorageStack<string>(historyKey, 20)
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => { pushValue(prompt); handleSubmit(e)}
   return (
     <div id={id} className={cn("flex flex-col gap-2 w-full p-1", className)}>
-      <form className="flex flex-row justify-between gap-2 w-full" onSubmit={handleSubmit}>
+      <form className="flex flex-row justify-between gap-2 w-full" onSubmit={onSubmit}>
         <div className="flex gap-1 flex-col w-full rounded ring ring-neutral-100 focus-within:ring-1 focus-within:ring-ring p-2">
           <Textarea ref={areaRef} disabled={isLoading}
             className="w-full resize-none"
@@ -56,6 +70,8 @@ const ChatInputPanel: React.FC<ChatInputProps> = ({ id = "chat-input-panel",
             <div className="flex p-0 m-0 gap-1 justify-start items-center w-full">
               <ChatSuggestion suggestions={suggestions}
                 open={suggestionOpen} setOpen={setSuggestionOpenAndFocus} setPrompt={setPrompt} />
+              <ChatRecents values={values} clearStack={clearStack}
+                open={historyOpen} setOpen={setHistoryOpenAndFocus} setPrompt={setPrompt} />
               <Button type="button" variant="outline" onClick={() => setPrompt("")}>
                 <Trash2 />Cancella
               </Button>

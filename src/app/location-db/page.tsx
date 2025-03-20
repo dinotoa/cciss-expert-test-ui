@@ -3,6 +3,6 @@ import SUGGESTIONS from "@/data/locationdb-chat-suggestions.json";
 
 export default function LocationDBPage() {
   return (
-    <ChatPanel suggestions={SUGGESTIONS} apiEndpoint="/api/locationdb-chat"/>
+    <ChatPanel suggestions={SUGGESTIONS} apiEndpoint="/api/locationdb-chat" historyKey="CCISS-EXPERT-LOCATIONDB-HISTORY"/>
   );
 }

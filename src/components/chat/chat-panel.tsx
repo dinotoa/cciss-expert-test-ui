@@ -11,11 +11,12 @@ import { ChatSuggestionType } from "./chat-suggestion"
 
 interface ChatPanelProps extends React.HTMLProps<HTMLElement> {
   apiEndpoint?: string
+  historyKey: string
   suggestions: ChatSuggestionType[]
 }
 
 const ChatPanel: React.FC<ChatPanelProps> = ({
-  id = "chat-panel", className, apiEndpoint="/api/chat", suggestions
+  id = "chat-panel", className, apiEndpoint="/api/chat", suggestions, historyKey
 }) => {
   const { error, messages, input, setInput, handleInputChange, handleSubmit, addToolResult,
     setMessages, status, stop } = useChat({
@@ -38,7 +39,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       {error && <ChatErrorPanel error={error} />}
       <ChatInputPanel id="user-input-panel" prompt={input} setPrompt={setInput}
         isLoading={isLoading} toolCallsPending={pendingToolCalls.length > 0}
-        suggestions={suggestions} usage={usage} stop={stop}
+        suggestions={suggestions} usage={usage} stop={stop} historyKey={historyKey}
         handleInputChange={handleInputChange} handleSubmit={handleSubmit} />
     </main>
   )

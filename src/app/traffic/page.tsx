@@ -3,6 +3,6 @@ import SUGGESTIONS from "@/data/traffic-chat-suggestions.json";
 
 export default function TrafficPage() {
   return (
-    <ChatPanel suggestions={SUGGESTIONS} apiEndpoint="/api/traffic-chat"/>
+    <ChatPanel suggestions={SUGGESTIONS} apiEndpoint="/api/traffic-chat" historyKey="CCISS-EXPERT-TRAFFIC-HISTORY"/>
   );
 }

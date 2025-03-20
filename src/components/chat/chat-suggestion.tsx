@@ -10,14 +10,14 @@ export interface ChatSuggestionType {
   suggestions: string[]
 }
 
-type ChatSuggestionProps = React.HTMLProps<HTMLElement> & {
+type ChatSuggestionsPanelProps = React.HTMLProps<HTMLElement> & {
   open: boolean
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
   setPrompt: React.Dispatch<React.SetStateAction<string>>
   suggestions?: ChatSuggestionType[]
 }
 
-const ChatSuggestionsPanel: React.FC<ChatSuggestionProps> = ({ id = "chat-suggestion-panel", className,
+const ChatSuggestionsPanel: React.FC<ChatSuggestionsPanelProps> = ({ id = "chat-suggestions-panel", className,
   open, setOpen, setPrompt, suggestions }) => {
   const isValid = suggestions && Array.isArray(suggestions) && suggestions.length > 0
   const [selectedTopic, setSelectedTopic] = useState(isValid ? suggestions[0].topic : "")
@@ -38,7 +38,7 @@ const ChatSuggestionsPanel: React.FC<ChatSuggestionProps> = ({ id = "chat-sugges
             suggestions={suggestions.find(s => s.topic === selectedTopic)?.suggestions ?? []}
             setOpen={setOpen} setPrompt={setPrompt} />
         </div>
-        <Button type="button" variant="outline" onClick={() => setOpen(false)}><X /></Button>
+        <Button type="button" variant="outline" size="icon" onClick={() => setOpen(false)}><X /></Button>
       </PopoverContent>
     </Popover>
   )
