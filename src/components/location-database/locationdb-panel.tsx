@@ -37,7 +37,7 @@ const LocationDatabasePanel: React.FC<LocationDatabasePanelProps> = ({ id = "loc
     loadFeatures()
   }, [loadFeatures])
   const filteredLocations = useMemo(() => features?.length ?
-    features?.filter(e => e.properties.name.toLowerCase().includes(searchTerm.toLowerCase())) : [],
+    features?.filter(e => (e.properties.name ?? "").toLowerCase().includes(searchTerm.toLowerCase())) : [],
     [features, searchTerm])
   const fullMBR = useMemo(() => {
     if (filteredLocations?.length) {

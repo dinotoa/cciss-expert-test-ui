@@ -1,4 +1,5 @@
 import { FeatureCollection, Geometry } from "geojson"
+import Fuse, { Expression } from "fuse.js"
 import { logErr, logInfo } from "../logging"
 import { cityData, provinceData, regionData, roadData } from "./location-db-data"
 import { getChildAreaTypes, isRoad, LDbAreaFeature, LDbFeature, LDbFeatureProps, LdbFeatureTypeEnum, LDbRoadFeature, LDbRoadProps } from "./location-db-types"
@@ -73,8 +74,58 @@ function getRoadsByName(name: string): LDbFeature[] {
   const roadNumbers = name.match(ROAD_NUMBER_RS)
   const roadName = name.replace(ROAD_NUMBER_RS, "").trim()
   logInfo("getRoadsByName: road number:", roadNumbers, "road name:", roadName)
-  
-  return []
+  const roadNumbersExpr = roadNumbers?.length
+    ? { $or: roadNumbers.map(rn => `{ properties.roadNumber: "${rn}"}`) }
+    : undefined
+  logInfo("getRoadsByName: roadNumbersExpr:", roadNumbersExpr)
+  const nameEprs = roadName?.length
+    ? {
+      $or: [
+        `{ properties.name: "${roadName}" }`,
+        `{ properties.firstName: "${roadName}" }`,
+        `{ properties.secondName: "${roadName}" }`
+      ]
+    }
+    : undefined
+  logInfo("getRoadsByName: nameEprs:", nameEprs)
+  const expression = roadNumbersExpr
+    ? (nameEprs ? { $and: [roadNumbersExpr, nameEprs] } : roadNumbersExpr)
+    : (nameEprs ? nameEprs : undefined)
+  logInfo("getRoadsByName: expression:", expression)
+  const roads = expression ? ROAD_FUSE.search(expression as Expression) : []
+  logInfo("getRoadsByName: roads:", roads)
+  return roads.map(r => r.item)
+}
+
+const ROAD_FUSE = new Fuse(Object.values(LDbRoads), {
+  keys: ["properties.roadNumber", "properties.name"],
+  ignoreDiacritics: true,
+  includeScore: true,
+  useExtendedSearch: true,
+  threshold: 0.2
+})
+
+export function getRoads(roadNum?: string, roadName?: string, areaName?: string): LDbRoadFeature[] {
+  const roadExpr = roadNum ? {
+    "properties.roadNumber": `=${roadNum}`
+  } as Expression :  undefined 
+  const nameExpr = roadName ? {
+    "properties.name": `${roadName}`
+  } as Expression : undefined
+  const searchExpr = roadExpr 
+    ? (nameExpr ? { $and: [roadExpr, nameExpr] } : roadExpr)
+    : nameExpr
+  const roads = searchExpr ? ROAD_FUSE.search(searchExpr) : []
+  // filter the roads w/o name (useful form autoroutes)
+  logInfo("getRoads:", "found", roads.length, "roads")
+  if ((roadName === undefined) || (roadName === null) || (roadName.length === 0)) {
+    const filteredRoads = roads.filter(r => !(r.item.properties.name))
+    if (filteredRoads.length) {
+      logInfo("getRoads:", "filtered", filteredRoads.length, "roads")
+      return filteredRoads.map(r => r.item)
+    }
+  }
+  return roads.map(r => r.item)
 }
 
 function normalizeName(name: string): string {

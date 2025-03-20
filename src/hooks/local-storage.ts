@@ -8,7 +8,7 @@ import { useState, useEffect } from "react"
  * @param maxElements Maximum number of elements to store
  * @returns Object containing stack operations
  */
-export function useLocalStorageStack<T>(key: string, maxElements = 10) {
+export function useLocalStorageStack<T>(key: string, maxElements = 10, compareFn?: (a: T, b: T) => boolean) {
     // Initialize state from localStorage or empty array
     const [values, setValues] = useState<T[]>(() => {
         // Only run in browser environment
@@ -30,6 +30,11 @@ export function useLocalStorageStack<T>(key: string, maxElements = 10) {
      */
     const pushValue = (value: T) => {
         setValues((prevValues) => {
+            if (compareFn) {
+                const filteredPrevValues = prevValues.filter((prevValue) => !compareFn(prevValue, value))
+                const newValues = [value, ...filteredPrevValues]
+                return newValues.slice(0, maxElements)
+            }
             const newValues = [value, ...prevValues]
             // If we exceed maxElements, trim the array
             return newValues.slice(0, maxElements)

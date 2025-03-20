@@ -1,5 +1,5 @@
 import { Message, ToolInvocation } from "ai"
-import { AREA_CHILDREN_TOOL_NAME, AREA_INFO_TOOL_NAME } from "@/ai/ai-library"
+import { AREA_CHILDREN_TOOL_NAME, AREA_INFO_TOOL_NAME, ROAD_INFO_TOOL_NAME } from "@/ai/ai-library"
 import { LocationDbResponseType } from "@/ai/locationdb-agent/locationdb-tools"
 import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools"
 import LocationDatabasePanel from "../location-database/locationdb-panel"
@@ -31,6 +31,7 @@ const ToolResultDetailsPanel: React.FC<ToolResultDetailsPanelProps> = ({ id, cla
       return <TrafficEventPanel id={id} className={className} trafficToolResponse={toolResult as TrafficEventToolResponse} />
     case AREA_INFO_TOOL_NAME:
     case AREA_CHILDREN_TOOL_NAME:
+    case ROAD_INFO_TOOL_NAME:
       return <LocationDatabasePanel id={id} className={className} locationData={toolResult as LocationDbResponseType} />
     // case "initiativeTool":
     //   return <InitiativesPanel id={id} className={className} initiativeData={toolData as InitiativeToolResponse} />

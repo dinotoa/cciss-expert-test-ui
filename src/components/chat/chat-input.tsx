@@ -42,8 +42,8 @@ const ChatInputPanel: React.FC<ChatInputProps> = ({ id = "chat-input-panel",
       areaRef.current?.focus()
     }
   }
-  const { values, pushValue, clearStack } = useLocalStorageStack<string>(historyKey, 20)
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => { pushValue(prompt); handleSubmit(e)}
+  const { values, pushValue, clearStack } = useLocalStorageStack<string>(historyKey, 20, (a, b) => a.localeCompare(b) === 0)
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => { if (prompt.trim().length > 0) { pushValue(prompt); handleSubmit(e) }}
   return (
     <div id={id} className={cn("flex flex-col gap-2 w-full p-1", className)}>
       <form className="flex flex-row justify-between gap-2 w-full" onSubmit={onSubmit}>
@@ -87,7 +87,7 @@ const ChatInputPanel: React.FC<ChatInputProps> = ({ id = "chat-input-panel",
               ? <Button variant="outline" type="button" onClick={stop}>
                 <Loader2 className="animate-spin h-4 w-4" />Stop
               </Button>
-              : <Button type="submit" variant="default" disabled={toolCallsPending} ><Send />Invia</Button>
+              : <Button type="submit" variant="default" disabled={toolCallsPending || prompt.trim().length === 0} ><Send />Invia</Button>
             }
           </div>
         </div>

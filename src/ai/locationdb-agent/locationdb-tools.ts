@@ -1,6 +1,6 @@
 import { getErrorMessage } from "@/lib/error-handling"
-import { getAreaChildren, getLocationsByTypeName } from "@/lib/location-database/location-db"
-import { isParentType, LDbFeature, LdbFeatureTypeEnum, ZLdbFeatureTypeEnum } from "@/lib/location-database/location-db-types"
+import { getAreaChildren, getLocationsByTypeName, getRoads } from "@/lib/location-database/location-db"
+import { isParentType, LDbFeature, LdbFeatureTypeEnum, LDbRoadFeature, ZLdbFeatureTypeEnum } from "@/lib/location-database/location-db-types"
 import { logErr, logInfo } from "@/lib/logging"
 import { tool } from "ai"
 import { z } from "zod"
@@ -9,6 +9,7 @@ interface LocationData {
     id: number,
     parentAreaId: number,
     type: LdbFeatureTypeEnum,
+    code?: string,
     name: string,
 }
 
@@ -42,8 +43,8 @@ const ZLocationDbRequest = z.object({
 const ZRoadInformationRequest = z.object({
     showMap: z.boolean().default(false).describe("true se l'utente richiede la mappa"),
     locationType: ZLdbFeatureTypeEnum.describe("tipo della località scelta dall'utente"),
-    roadNumber: z.string().describe("numero della strada, exempio: A1, SS23, SR43"),
-    roadName: z.string().describe("nome della strada"),
+    roadNumber: z.string().optional().describe("numero della strada, esempio: A1, SS23, SR43"),
+    roadName: z.string().optional().describe("nome della strada"),
     areaName: z.string().optional().describe("nome della città, provincia o regione dove si trova la strada"),
 })
 
@@ -100,14 +101,14 @@ const areaChildrenTool = tool({
 
 const roadInfoTool = tool({
     description: "fornisce informazioni su una strada o un indirizzo",
-    parameters: ZRoadInformationRequest.describe("i paremetri per la ricerca della strada o dell'indirizzo"),
+    parameters: ZRoadInformationRequest.describe("i parametri per la ricerca della strada o dell'indirizzo"),
     execute: async ({ showMap, locationType, roadNumber, roadName, areaName }): Promise<LocationDbResponseType> => {
         const TOOL_NAME = "roadInfoTool:"
         try {
             logInfo(TOOL_NAME, "type:", locationType, "number:", roadNumber, "name:", roadName, "area:", areaName)
-            const roads = getLocationsByTypeName(locationType, roadName)
+            const roads = getRoads(roadNumber, roadName, areaName)
             
-            return { showMap, locations: [] }
+            return { showMap, locations: roads.map(mapRoadData) }
         } catch (error) {
             logErr(`${TOOL_NAME}: ${error}`)
             return { errorMessage: getErrorMessage(error) }
@@ -125,6 +126,16 @@ const locationChooseTool = tool({
 function mapLocationData(location: LDbFeature): LocationData {
     return {
         "id": location.properties.id,
+        "parentAreaId": location.properties.parentAreaId,
+        "type": location.properties.type,
+        "name": location.properties.name,
+    }
+}
+
+function mapRoadData(location: LDbRoadFeature): LocationData {
+    return {
+        "id": location.properties.id,
+        "code": location.properties.roadNumber,
         "parentAreaId": location.properties.parentAreaId,
         "type": location.properties.type,
         "name": location.properties.name,

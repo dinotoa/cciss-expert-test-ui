@@ -8,6 +8,8 @@ export const TRAFFIC_TOOL_NAME = "trafficSelectionTool"
 export const AREA_SELECTION_TOOL_NAME = "areaSelectionTool"
 export const AREA_INFO_TOOL_NAME = "areaInfoTool"
 export const AREA_CHILDREN_TOOL_NAME = "areaChildrenTool"
+export const ROAD_INFO_TOOL_NAME = "roadInfoTool"
+
 export const AgentEnumZod = z.enum([
     "information",
     "traffic"
