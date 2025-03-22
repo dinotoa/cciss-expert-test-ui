@@ -105,12 +105,20 @@ const ROAD_FUSE = new Fuse(Object.values(LDbRoads), {
   threshold: 0.2
 })
 
+const STOP_WORDS = ["e", "di", "per", "in", "con", "su", "del", "dal", "tra", "fra", "verso"]
 export function getRoads(roadNum?: string, roadName?: string, areaName?: string): LDbRoadFeature[] {
   const roadExpr = roadNum ? {
     "properties.roadNumber": `=${roadNum}`
-  } as Expression :  undefined 
-  const nameExpr = roadName ? {
-    "properties.name": `${roadName}`
+  } as Expression : undefined
+
+  const normalizedRoadName = roadName ? 
+    roadName.split(" ")
+      .filter(w => !STOP_WORDS.includes(w))
+      .map(w => `'${w}`)
+      .join(" ")
+    : roadName
+  const nameExpr = normalizedRoadName ? {
+    "properties.name": `${normalizedRoadName}`
   } as Expression : undefined
   const searchExpr = roadExpr 
     ? (nameExpr ? { $and: [roadExpr, nameExpr] } : roadExpr)

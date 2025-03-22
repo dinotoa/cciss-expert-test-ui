@@ -44,7 +44,8 @@ const ZRoadInformationRequest = z.object({
     showMap: z.boolean().default(false).describe("true se l'utente richiede la mappa"),
     locationType: ZLdbFeatureTypeEnum.describe("tipo della località scelta dall'utente"),
     roadNumber: z.string().optional().describe("numero della strada, esempio: A1, SS23, SR43"),
-    roadName: z.string().optional().describe("nome della strada"),
+    roadName: z.string().optional().describe("nome della strada richiesta"),
+    areaType: ZLdbFeatureTypeEnum.optional().describe("tipo di area in cui cercare la strada"),
     areaName: z.string().optional().describe("nome della città, provincia o regione dove si trova la strada"),
 })
 
