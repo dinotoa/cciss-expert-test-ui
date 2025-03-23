@@ -35,15 +35,8 @@ const STOP_WORDS = new Set(["e", "ed", "a", "ad", "o", "od",
 
 export function getLocationsByTypeName(type: LdbFeatureTypeEnum, code?: string, name?: string): LDbFeature[] {
   const results = featureSearch(type, code, name)
-  // if (results.length) {
-  //   const [best, worst] = results.reduce(([best, worst], r) => [
-  //     Math.max(best, 1 - (r.score ?? 0)),
-  //     Math.min(worst, 1 - (r.score ?? 0))
-  //   ], [-1, 1])
-  const [best, worst] = [1, 0]
   if (results?.length) {
-    logInfo("found ", results.length, " results for type:", type, " code:", code, " name:", name,
-      "best:", best, " worst:", worst)
+    logInfo("found ", results.length, " results for type:", type, " code:", code, " name:", name)
   } else {
     logErr("no results for type:", type, " code:", code, " name:", name)
   }

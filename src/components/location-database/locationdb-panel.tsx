@@ -58,7 +58,7 @@ const LocationDatabasePanel: React.FC<LocationDatabasePanelProps> = ({ id = "loc
             createItemPanel={createItemPanel} />
         }
         <MapPanel id={`${id}__map`} className="w-[70%] h-full"
-          features={filteredLocations} selectedFeature={selectedItem}
+          features={filteredLocations} selectedFeature={selectedItem} setSelectedFeature={setSelectedItem}
           fullMBR={fullMBR} desiredMBR={mapMBR} setMapMBR={setMapMBR} />
       </section>
     </FullScreenPanel>

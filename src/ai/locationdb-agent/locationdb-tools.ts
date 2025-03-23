@@ -1,5 +1,5 @@
 import { getErrorMessage } from "@/lib/error-handling"
-import { getAreaChildren, getLocationsByTypeName } from "@/lib/location-database/location-db"
+import { getAreaChildren, getFeaturesById, getLocationsByTypeName } from "@/lib/location-database/location-db"
 import { isParentType, LDbFeature, LdbFeatureTypeEnum, LDbRoadFeature, ZLdbFeatureTypeEnum } from "@/lib/location-database/location-db-types"
 import { logErr, logInfo } from "@/lib/logging"
 import { tool } from "ai"
@@ -8,7 +8,11 @@ import { z } from "zod"
 interface LocationData {
     id: number,
     parentAreaId: number,
-    type: LdbFeatureTypeEnum,
+    parentAreaGenericType?: LdbFeatureTypeEnum,
+    parentAreaType?: string,
+    parentAreaName?: string,
+    genericType: LdbFeatureTypeEnum,
+    type?: string,
     code?: string,
     name: string,
 }
@@ -75,7 +79,7 @@ const areaInfoTool = tool({
 
 const areaChildrenTool = tool({
     description: "fornisce informazioni sulle aree (regione, provincia o città) contenute in un'altra area (regione, provincia o città)",
-    parameters: ZLocationInLocationRequest.describe("i paremetri per la ricerca della località"),
+    parameters: ZLocationInLocationRequest.describe("i parametri per la ricerca della località"),
     execute: async ({ showMap, parentLocationType, childLocationType, parentLocationName }): Promise<LocationDbResponseType> => {
         const TOOL_NAME = "areaChildrenTool"
         logInfo(`${TOOL_NAME}: parent type: ${parentLocationType} name: ${parentLocationName} child type: ${childLocationType}`)
@@ -125,21 +129,33 @@ const locationChooseTool = tool({
 })
 
 function mapLocationData(location: LDbFeature): LocationData {
+    const parentArea = location.properties.parentAreaId > 0 ?
+        getFeaturesById([location.properties.parentAreaId])[0] : undefined
     return {
         "id": location.properties.id,
         "parentAreaId": location.properties.parentAreaId,
-        "type": location.properties.type,
+        "genericType": location.properties.type,
+        "type": location.properties.tmcTypeDescription,
         "name": location.properties.name,
+        "parentAreaGenericType": parentArea?.properties.type,
+        "parentAreaType": parentArea?.properties.tmcTypeDescription,
+        "parentAreaName": parentArea?.properties.name
     }
 }
 
 function mapRoadData(location: LDbRoadFeature): LocationData {
+    const parentArea = location.properties.parentAreaId > 0 ?
+        getFeaturesById([location.properties.parentAreaId])[0] : undefined
     return {
         "id": location.properties.id,
         "code": location.properties.roadNumber,
         "parentAreaId": location.properties.parentAreaId,
-        "type": location.properties.type,
+        "genericType": location.properties.type,
+        "type": location.properties.tmcTypeDescription,
         "name": location.properties.name,
+        "parentAreaGenericType": parentArea?.properties.type,
+        "parentAreaType": parentArea?.properties.tmcTypeDescription,
+        "parentAreaName": parentArea?.properties.name
     }
 }
 
