@@ -1,5 +1,5 @@
 import { getErrorMessage } from "@/lib/error-handling"
-import { getAreaChildren, getLocationsByTypeName, getRoads } from "@/lib/location-database/location-db"
+import { getAreaChildren, getLocationsByTypeName } from "@/lib/location-database/location-db"
 import { isParentType, LDbFeature, LdbFeatureTypeEnum, LDbRoadFeature, ZLdbFeatureTypeEnum } from "@/lib/location-database/location-db-types"
 import { logErr, logInfo } from "@/lib/logging"
 import { tool } from "ai"
@@ -63,7 +63,7 @@ const areaInfoTool = tool({
         const TOOL_NAME = "areaInfoTool"
         logInfo(`${TOOL_NAME}: locationType: ${locationType} locationName: ${locationName}`)
         try {
-            const data = getLocationsByTypeName(locationType, locationName)
+            const data = getLocationsByTypeName(locationType, undefined, locationName)
             logInfo(`${TOOL_NAME}: returning ${data.length} locations`)
             const locations = data.map(mapLocationData)
             return { showMap, locations }
@@ -85,7 +85,7 @@ const areaChildrenTool = tool({
                 logInfo(`${TOOL_NAME}: ${error}`)
                 return { errorMessage: error }
             }
-            const parentData = getLocationsByTypeName(parentLocationType, parentLocationName)
+            const parentData = getLocationsByTypeName(parentLocationType, undefined, parentLocationName)
             if (parentData?.length === 0) {
                 return { errorMessage: `Nessuna ${parentLocationType} trovata per ${parentLocationName}` }
             }
@@ -107,7 +107,7 @@ const roadInfoTool = tool({
         const TOOL_NAME = "roadInfoTool:"
         try {
             logInfo(TOOL_NAME, "type:", locationType, "number:", roadNumber, "name:", roadName, "area:", areaName)
-            const roads = getRoads(roadNumber, roadName, areaName)
+            const roads = getLocationsByTypeName(LdbFeatureTypeEnum.Road, roadNumber, roadName) as LDbRoadFeature[]
             
             return { showMap, locations: roads.map(mapRoadData) }
         } catch (error) {
