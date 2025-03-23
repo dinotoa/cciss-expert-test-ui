@@ -136,6 +136,7 @@ function mapLocationData(location: LDbFeature): LocationData {
         "parentAreaId": location.properties.parentAreaId,
         "genericType": location.properties.type,
         "type": location.properties.tmcTypeDescription,
+        "code": location.properties.areaCode,
         "name": location.properties.name,
         "parentAreaGenericType": parentArea?.properties.type,
         "parentAreaType": parentArea?.properties.tmcTypeDescription,

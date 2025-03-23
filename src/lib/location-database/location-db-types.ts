@@ -23,6 +23,7 @@ export interface LDbFeatureProps {
   type: LdbFeatureTypeEnum
   tmcTypeId: string
   tmcTypeDescription: string
+  areaCode?: string
   name: string
   mbr?: MapRectangle
   centroid?: MapPoint
