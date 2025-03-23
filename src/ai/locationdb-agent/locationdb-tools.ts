@@ -107,7 +107,7 @@ const roadInfoTool = tool({
         const TOOL_NAME = "roadInfoTool:"
         try {
             logInfo(TOOL_NAME, "type:", locationType, "number:", roadNumber, "name:", roadName, "area:", areaName)
-            const roads = getLocationsByTypeName(LdbFeatureTypeEnum.Road, roadNumber, roadName) as LDbRoadFeature[]
+            const roads = getLocationsByTypeName(locationType, roadNumber, roadName) as LDbRoadFeature[]
             
             return { showMap, locations: roads.map(mapRoadData) }
         } catch (error) {

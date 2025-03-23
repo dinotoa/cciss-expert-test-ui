@@ -1,5 +1,5 @@
 import { FeatureCollection, Geometry } from "geojson"
-import Fuse, { Expression } from "fuse.js"
+import MiniSearch, { SearchResult } from "minisearch"
 import { logErr, logInfo } from "../logging"
 import { cityData, provinceData, regionData, roadData } from "./location-db-data"
 import { getChildAreaTypes, isRoad, LDbAreaFeature, LDbFeature, LDbFeatureProps, LdbFeatureTypeEnum, LDbRoadFeature, LDbRoadProps } from "./location-db-types"
@@ -13,18 +13,18 @@ const LDbAreas = {
   ...LDbCities,
 }
 const LDbRoads = (roadData as unknown as FeatureCollection<Geometry, LDbRoadProps>).features.reduce(reduceRoadFeatures, {})
-const LdbFeatures = Object.values({
+const LdbFeatures = {
   ...LDbAreas,
   ...LDbRoads
-})
+}
 
-const FEATURE_SEARCH = new Fuse(LdbFeatures, {
-  keys: ["properties.type", "properties.roadNumber", "properties.name"],
-  ignoreDiacritics: true,
-  includeScore: true,
-  useExtendedSearch: true,
-  threshold: 0.2
+const FEATURES = [...Object.values(LdbFeatures)]
+  .map(f => f.properties)
+const FEATURE_SEARCH = new MiniSearch({
+  fields: ["roadNumber", "name"],
+  storeFields: ["id", "type"]
 })
+FEATURE_SEARCH.addAll(FEATURES)
 
 const STOP_WORDS = new Set(["e", "ed", "a", "ad", "o", "od",
   "il", "lo", "la", "i", "gli", "le", "l",
@@ -33,30 +33,21 @@ const STOP_WORDS = new Set(["e", "ed", "a", "ad", "o", "od",
   "in", "con", "su", "per", "tra", "fra"
 ])
 
-function normalizeSearch(searchString: string) {
-  const result = searchString
-    ? searchString
-      .replace(/[\s+\p{P}]+/gu, " ")
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .split(" ")
-      .filter(w => !STOP_WORDS.has(w) && w.length > 1)
-    : null
-  return result
-}
-
 export function getLocationsByTypeName(type: LdbFeatureTypeEnum, code?: string, name?: string): LDbFeature[] {
   const results = featureSearch(type, code, name)
-  if (results.length) {
-    const [best, worst] = results.reduce(([best, worst], r) => [
-      Math.max(best, 1 - (r.score ?? 0)),
-      Math.min(worst, 1 - (r.score ?? 0))
-    ], [-1, 1])
+  // if (results.length) {
+  //   const [best, worst] = results.reduce(([best, worst], r) => [
+  //     Math.max(best, 1 - (r.score ?? 0)),
+  //     Math.min(worst, 1 - (r.score ?? 0))
+  //   ], [-1, 1])
+  const [best, worst] = [1, 0]
+  if (results?.length) {
     logInfo("found ", results.length, " results for type:", type, " code:", code, " name:", name,
       "best:", best, " worst:", worst)
   } else {
     logErr("no results for type:", type, " code:", code, " name:", name)
   }
-  return results.map(r => r.item)
+  return results
 }
 
 export function isParentType(parentType: LdbFeatureTypeEnum, childType: LdbFeatureTypeEnum): boolean {
@@ -89,26 +80,40 @@ export function getAreaChildren(area: LDbAreaFeature, childrenType: LdbFeatureTy
 }
 
 export function getFeaturesById(ids: number[]): LDbFeature[] {
-  return ids.map(id => LDbAreas[id] || LDbRoads[id])
+  return ids.map(id => LdbFeatures[id])
+}
+
+function normalizeSearch(searchString: string) {
+  const result = searchString
+    ? searchString
+      .replace(/[\s+\p{P}]+/gu, " ")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .split(" ")
+      .filter(w => !STOP_WORDS.has(w) && w.length > 1)
+    : null
+  return result
 }
 
 function featureSearch(type: string, number?: string, name?: string, limit: number = 10) {
   const normalizedNumber = number?.length ? number.trim() : null
   const normalizedName = name ? normalizeSearch(name) : null
-  const typeExpr = type?.trim().length ? { "properties.type": `=${type.trim()}` } : null
-  const roadNumberExpr = normalizedNumber ? { "properties.roadNumber": `=${normalizedNumber.trim()}` } : null
-  const nameExpr = normalizedName?.length ?
-    {
-      $and: normalizedName.map(n => ({ "properties.name": `'${n}` }))
-    } as Expression : null
-  const completeExpr = typeExpr || roadNumberExpr || nameExpr
-    ? {
-      $and: [typeExpr, roadNumberExpr, nameExpr].filter(e => e)
-    } as Expression
-    : null
-  console.log(JSON.stringify(completeExpr))
-  const results = completeExpr ? FEATURE_SEARCH.search(completeExpr, { limit }) : []
-  return results
+  const queries = []
+  if (normalizedName?.length) {
+    queries.push({ queries: normalizedName, fields: ["name"] })
+  }
+  if (normalizedNumber?.length) {
+    queries.push({ queries: [normalizedNumber], fields: ["roadNumber"] })
+  }
+  if (queries.length) {
+    const results = FEATURE_SEARCH.search({
+      combineWith: "AND",
+      queries
+    }, {
+      filter: (r: SearchResult) => r.type === type
+    }).slice(0, limit)
+    return results.map(r => LdbFeatures[r.id])
+  }
+  return []
 }
 
 function reduceAreaFeatures(acc: { [id: number]: LDbAreaFeature }, feat: LDbAreaFeature) {

@@ -8,7 +8,7 @@ import { logInfo } from "../logging";
 
 
 export async function fetchTrafficInfoByFeatures(topics: TopicArrayType): Promise<TrafficDataResponse> {
-    const mappedTopics = topics.flatMap(t => getLocationsByTypeName(t.locationType, undefined, t.locationName))
+    const mappedTopics = topics.flatMap(t => getLocationsByTypeName(t.locationType, t.locationName))
     const containingGeometries = mappedTopics.map(t => t.geometry)
     const trafficDataResponse = await fetchTrafficDataBySlug("italia")
     if (trafficDataResponse.error) {
