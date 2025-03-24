@@ -1,13 +1,13 @@
-import React, { useMemo } from "react"
-import CopyButton from "../copy-button"
-import { cn, markdownToText } from "@/lib/utils"
-import MarkdownPanel from "@/components/ui/markdown-panel"
 import { Button } from "@/components/ui/button"
+import MarkdownPanel from "@/components/ui/markdown-panel"
+import { cn } from "@/lib/utils"
 import { Popover } from "@radix-ui/react-popover"
 import { Message } from "ai/react"
 import { BotMessageSquare, Loader2, Trash2, User, Volume2 } from "lucide-react"
-import { PopoverContent, PopoverTrigger } from "../ui/popover"
+import React from "react"
+import CopyButton from "../copy-button"
 import SpeechSynthesisPlayer from "../tools/tts-player"
+import { PopoverContent, PopoverTrigger } from "../ui/popover"
 import ChatToolCallsPanel from "./chat-tool-calls"
 import ChatToolsResultPanel from "./chat-tool-result"
 
@@ -59,19 +59,18 @@ const UserPromptPanel: React.FC<MessageDataProps> = ({ id = "user-prompt-panel",
 }
 
 const AgentResultsPanel: React.FC<MessageDataProps> = ({ id = "agent-results-panel", className, message }) => {
-  const messageToCopy = useMemo(() => markdownToText(message.content ?? ""), [message.content])
   const [isOpen, setOpen] = React.useState(false)
   return (
     <div id={id} className={cn(className, "flex flex-row gap-3 w-full justify-between items-start", className)}>
       <MarkdownPanel className="w-auto" content={message.content} />
-      {messageToCopy?.length ?
+      {message.content?.length ?
         <div className="flex flex-row gap-1 justify-start items-center flex-wrap flex-shrink">
           <Popover open={isOpen} onOpenChange={setOpen} >
             <PopoverTrigger asChild>
               <Button variant={isOpen ? "default" : "outline"} size="icon" onClick={() => setOpen(!isOpen)}><Volume2 /></Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[25rem]" side="left">
-              <SpeechSynthesisPlayer className="border-0 shadow-none p-0" text={messageToCopy} onClose={() => setOpen(false)} />
+            <PopoverContent className="w-[25rem] z-[2000]" side="left">
+              <SpeechSynthesisPlayer className="border-0 shadow-none p-0" text={message.content} onClose={() => setOpen(false)} />
             </PopoverContent>
           </Popover>
           <CopyButton value={message.content} />
