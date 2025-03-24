@@ -48,9 +48,16 @@ export function useLocalStorageStack<T>(key: string, maxElements = 10, compareFn
         setValues([])
     }
 
+    const deleteEntry = (index: number) => {
+        const newValues = [...values]
+        newValues.splice(index, 1)
+        setValues(newValues)
+    }
+
     return {
         values,
         pushValue,
+        deleteEntry,
         clearStack,
     }
 }

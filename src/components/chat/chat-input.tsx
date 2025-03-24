@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 import { LanguageModelUsage } from "ai";
 import { Loader2, Send, Trash2 } from "lucide-react";
 import { Textarea } from "../ui/textarea";
-import ChatSuggestion, { ChatSuggestionType } from "./chat-suggestion";
-import ChatRecents from "./chat-history";
+import ChatSuggestionPanel, { ChatSuggestionType } from "./chat-suggestion";
+import ChatHistoryPanel from "./chat-history";
 import { useLocalStorageStack } from "@/hooks/local-storage";
 
 type ChatInputProps = React.HTMLProps<HTMLElement> & {
@@ -42,7 +42,7 @@ const ChatInputPanel: React.FC<ChatInputProps> = ({ id = "chat-input-panel",
       areaRef.current?.focus()
     }
   }
-  const { values, pushValue, clearStack } = useLocalStorageStack<string>(historyKey, 20, (a, b) => a.localeCompare(b) === 0)
+  const { values, pushValue, clearStack, deleteEntry } = useLocalStorageStack<string>(historyKey, 20, (a, b) => a.localeCompare(b) === 0)
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => { if (prompt.trim().length > 0) { pushValue(prompt); handleSubmit(e) }}
   return (
     <div id={id} className={cn("flex flex-col gap-2 w-full p-1", className)}>
@@ -68,9 +68,9 @@ const ChatInputPanel: React.FC<ChatInputProps> = ({ id = "chat-input-panel",
           />
           <div className="w-full flex flex-row justify-between items-center gap-1">
             <div className="flex p-0 m-0 gap-1 justify-start items-center w-full">
-              <ChatSuggestion suggestions={suggestions}
+              <ChatSuggestionPanel suggestions={suggestions}
                 open={suggestionOpen} setOpen={setSuggestionOpenAndFocus} setPrompt={setPrompt} />
-              <ChatRecents values={values} clearStack={clearStack}
+              <ChatHistoryPanel values={values} clearStack={clearStack} deleteEntry={deleteEntry}
                 open={historyOpen} setOpen={setHistoryOpenAndFocus} setPrompt={setPrompt} />
               <Button type="button" variant="outline" onClick={() => setPrompt("")}>
                 <Trash2 />Cancella
