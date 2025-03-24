@@ -22,7 +22,7 @@ const FEATURES = [...Object.values(LdbFeatures)]
   .map(f => f.properties)
 const FEATURE_SEARCH = new MiniSearch({
   fields: ["roadNumber", "name"],
-  storeFields: ["id", "type"]
+  storeFields: ["id", "type", "parentAreaId"]
 })
 FEATURE_SEARCH.addAll(FEATURES)
 
@@ -33,8 +33,26 @@ const STOP_WORDS = new Set(["e", "ed", "a", "ad", "o", "od",
   "in", "con", "su", "per", "tra", "fra"
 ])
 
-export function getLocationsByTypeName(type: LdbFeatureTypeEnum, code?: string, name?: string): LDbFeature[] {
-  const results = featureSearch(type, code, name)
+
+export function getAreaIdHierarchy(areaId: number): number[] {
+  const area = LDbAreas[areaId]
+  if (area) {
+    const hierarchy = [area.properties.id]
+    for (const childType of nextInAreaHierarchy(area.properties.type)) {
+      const children = Object.values(LDbAreas).filter(a => (a.properties.type === childType) && (hierarchy.includes(a.properties.parentAreaId)))
+      if (children.length) {
+        hierarchy.push(...children.map(a => a.properties.id))
+      } else {
+        break
+      }
+    }
+    return hierarchy
+  }
+  return []
+}
+
+export function getLocationsByTypeName(type: LdbFeatureTypeEnum, code?: string, name?: string, areaHierarchy: number[] = [], limit: number = 10): LDbFeature[] {
+  const results = featureSearch(type, code, name, areaHierarchy, limit)
   if (results?.length) {
     logInfo("found ", results.length, " results for type:", type, " code:", code, " name:", name)
   } else {
@@ -53,6 +71,16 @@ export function isParentType(parentType: LdbFeatureTypeEnum, childType: LdbFeatu
       return isRoad(childType)
   }
   return isRoad(childType) && isRoad(parentType)
+}
+
+function nextInAreaHierarchy(type: LdbFeatureTypeEnum) {
+  switch (type) {
+    case LdbFeatureTypeEnum.Region:
+      return [LdbFeatureTypeEnum.Province, LdbFeatureTypeEnum.City]
+    case LdbFeatureTypeEnum.Province:
+      return [LdbFeatureTypeEnum.City]
+  }
+  return [] as LdbFeatureTypeEnum[]
 }
 
 export function getAreaChildren(area: LDbAreaFeature, childrenType: LdbFeatureTypeEnum): LDbAreaFeature[] {
@@ -81,16 +109,18 @@ function normalizeSearch(searchString: string) {
     ? searchString
       .replace(/[\s+\p{P}]+/gu, " ")
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
       .split(" ")
       .filter(w => !STOP_WORDS.has(w) && w.length > 1)
     : null
   return result
 }
 
-function featureSearch(type: string, number?: string, name?: string, limit: number = 10) {
+function featureSearch(type: string, number?: string, name?: string, areaHierarchy: number[] = [], limit: number = 10) {
   const normalizedNumber = number?.length ? number.trim() : null
   const normalizedName = name ? normalizeSearch(name) : null
   const queries = []
+  const areaSet = new Set(areaHierarchy)
   if (normalizedName?.length) {
     queries.push({ queries: normalizedName, fields: ["name"] })
   }
@@ -102,11 +132,25 @@ function featureSearch(type: string, number?: string, name?: string, limit: numb
       combineWith: "AND",
       queries
     }, {
-      filter: (r: SearchResult) => r.type === type
+      filter: (r: SearchResult) => (r.type === type) && ((areaSet?.size === 0) || (areaSet.has(r.parentAreaId)))
     }).slice(0, limit)
-    return results.map(r => LdbFeatures[r.id])
+    const features = results.map(r => LdbFeatures[r.id])
+    if (normalizedName && features.length > 1) {
+      // try to find an exact match
+      const normalizedNameSet = new Set(normalizedName)
+      const exactMatch = features.find(a => isExactMatch(a, normalizedNameSet))
+      if (exactMatch) {
+        return [exactMatch]
+      }
+    }
+    return features
   }
   return []
+}
+
+function isExactMatch(area: LDbFeature, name: Set<string>) {
+  const areaNameSet = new Set(normalizeSearch(area.properties.name))
+  return areaNameSet.intersection(name).size === name.size
 }
 
 function reduceAreaFeatures(acc: { [id: number]: LDbAreaFeature }, feat: LDbAreaFeature) {
@@ -118,3 +162,4 @@ function reduceRoadFeatures(acc: { [id: number]: LDbRoadFeature }, feat: LDbRoad
   acc[feat.properties.id] = feat
   return acc
 }
+

@@ -1,9 +1,10 @@
 import { getErrorMessage } from "@/lib/error-handling"
-import { getAreaChildren, getFeaturesById, getLocationsByTypeName } from "@/lib/location-database/location-db"
+import { getAreaChildren, getAreaIdHierarchy, getFeaturesById, getLocationsByTypeName } from "@/lib/location-database/location-db"
 import { isParentType, LDbFeature, LdbFeatureTypeEnum, LDbRoadFeature, ZLdbFeatureTypeEnum } from "@/lib/location-database/location-db-types"
 import { logErr, logInfo } from "@/lib/logging"
 import { tool } from "ai"
 import { z } from "zod"
+import ALTERNATIVE_NAMES from "@/data/alternative-names.json"
 
 interface LocationData {
     id: number,
@@ -66,7 +67,8 @@ const areaInfoTool = tool({
         const TOOL_NAME = "areaInfoTool"
         logInfo(`${TOOL_NAME}: locationType: ${locationType} locationName: ${locationName}`)
         try {
-            const data = getLocationsByTypeName(locationType, undefined, locationName)
+            const alternativeName = (ALTERNATIVE_NAMES as Record<string, string>)[locationName.toLowerCase()]
+            const data = getLocationsByTypeName(locationType, undefined, alternativeName ?? locationName)
             logInfo(`${TOOL_NAME}: returning ${data.length} locations`)
             const locations = data.map(mapLocationData)
             return { showMap, locations }
@@ -88,7 +90,8 @@ const areaChildrenTool = tool({
                 logInfo(`${TOOL_NAME}: ${error}`)
                 return { errorMessage: error }
             }
-            const parentData = getLocationsByTypeName(parentLocationType, undefined, parentLocationName)
+            const alternativeName = (ALTERNATIVE_NAMES as Record<string, string>)[parentLocationName.toLowerCase()]
+            const parentData = getLocationsByTypeName(parentLocationType, undefined, alternativeName ?? parentLocationName)
             if (parentData?.length === 0) {
                 return { errorMessage: `Nessuna ${parentLocationType} trovata per ${parentLocationName}` }
             }
@@ -106,11 +109,23 @@ const areaChildrenTool = tool({
 const roadInfoTool = tool({
     description: "fornisce informazioni su una strada o un indirizzo",
     parameters: ZRoadInformationRequest.describe("i parametri per la ricerca della strada o dell'indirizzo"),
-    execute: async ({ showMap, locationType, roadNumber, roadName, areaName }): Promise<LocationDbResponseType> => {
+    execute: async ({ showMap, locationType, roadNumber, roadName, areaType, areaName }): Promise<LocationDbResponseType> => {
         const TOOL_NAME = "roadInfoTool:"
         try {
-            logInfo(TOOL_NAME, "type:", locationType, "number:", roadNumber, "name:", roadName, "area:", areaName)
-            const roads = getLocationsByTypeName(locationType, roadNumber, roadName) as LDbRoadFeature[]
+            logInfo(TOOL_NAME, "type:", locationType, "number:", roadNumber, "name:", roadName, "area type:", areaType, "area name:", areaName)
+            let hierarchy = [] as number[]
+            if (areaName) {
+                const alternativeName = (ALTERNATIVE_NAMES as Record<string, string>)[areaName.toLowerCase()]
+                const areas = getLocationsByTypeName(areaType ?? LdbFeatureTypeEnum.Province, undefined, alternativeName ?? areaName)
+                if (areas.length === 0) {
+                    return { errorMessage: `Nessuna ${areaType} trovata per "${areaName}"` }
+                } else if (areas.length > 1) {
+                    return { errorMessage: `Ci sono diverse ${areaType} con un nome simile a "${areaName}"` }
+                }
+                const area = areas[0]
+                hierarchy = getAreaIdHierarchy(area.properties.id)
+            }
+            const roads = getLocationsByTypeName(locationType, roadNumber, roadName, hierarchy) as LDbRoadFeature[]
             
             return { showMap, locations: roads.map(mapRoadData) }
         } catch (error) {

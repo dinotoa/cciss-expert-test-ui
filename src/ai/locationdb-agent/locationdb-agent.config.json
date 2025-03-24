@@ -27,7 +27,7 @@
     "### Domanda",
     "informazioni sul tratto della A1 milano napoli nel lazio",
     "### Parametri per il tool roadInfoTool",
-    "locationType: road",
+    "locationType: strada",
     "roadNumber: A1",
     "roadName: milano napoli",
     "areaName: lazio",
@@ -35,7 +35,12 @@
     "### Domanda",
     "informazioni sulla strada per aeroporto fiumicino",
     "### Parametri per il tool roadInfoTool",
-    "locationType: road",
-    "roadName: aeroporto fiumicino"
+    "locationType: strada",
+    "roadName: aeroporto fiumicino",
+    "### Domanda",
+    "in quali aree si trova la SP1",
+    "### Parametri per il tool roadInfoTool",
+    "locationType: strada",
+    "roadNumber: SP1"
   ]
 }
