@@ -7,13 +7,15 @@ attività del CCISS.
 
 - [Next.js](https://nextjs.org)
 - [Shadcn](https://ui.shadcn.com/)
-- [Teilwind](https://tailwindcss.com/)
+- [Tailwind](https://tailwindcss.com/)
 - [Vercel AI SDK](https://sdk.vercel.ai)
 - [Graphql request](https://github.com/graffle-js/graffle)
 - [React leaflet](https://react-leaflet.js.org/)
 - [Leaflet](https://leafletjs.com/)
 - [React Markdown](https://github.com/remarkjs/react-markdown)
 - [Remark Gfm](https://github.com/remarkjs/remark-gfm)
+- [Minisearch](https://lucaong.github.io/minisearch/)
+- [Turf](https://turfjs.org/)
 - [Zod](https://zod.dev/)]
 
 ## Sviluppo
