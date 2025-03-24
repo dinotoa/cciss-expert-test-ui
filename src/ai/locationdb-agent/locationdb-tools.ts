@@ -8,8 +8,7 @@ import { z } from "zod"
 interface LocationData {
     id: number,
     parentAreaId: number,
-    parentAreaGenericType?: LdbFeatureTypeEnum,
-    parentAreaType?: string,
+    parentAreaType?: LdbFeatureTypeEnum,
     parentAreaName?: string,
     genericType: LdbFeatureTypeEnum,
     type?: string,
@@ -138,8 +137,7 @@ function mapLocationData(location: LDbFeature): LocationData {
         "type": location.properties.tmcTypeDescription,
         "code": location.properties.areaCode,
         "name": location.properties.name,
-        "parentAreaGenericType": parentArea?.properties.type,
-        "parentAreaType": parentArea?.properties.tmcTypeDescription,
+        "parentAreaType": parentArea?.properties.type,
         "parentAreaName": parentArea?.properties.name
     }
 }
@@ -154,8 +152,7 @@ function mapRoadData(location: LDbRoadFeature): LocationData {
         "genericType": location.properties.type,
         "type": location.properties.tmcTypeDescription,
         "name": location.properties.name,
-        "parentAreaGenericType": parentArea?.properties.type,
-        "parentAreaType": parentArea?.properties.tmcTypeDescription,
+        "parentAreaType": parentArea?.properties.type,
         "parentAreaName": parentArea?.properties.name
     }
 }

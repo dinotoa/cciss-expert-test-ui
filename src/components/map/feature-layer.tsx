@@ -36,7 +36,7 @@ const FeatureLayer: React.FC<FeatureLayerProps> = ({ features, selectedFeature, 
                     selected={selected} setSelectedFeature={setSelectedFeature} />
 
             case "MultiPoint":
-                return <MultilineLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                return <MultiPointLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
                     selected={selected} setSelectedFeature={setSelectedFeature} />
 
             case "MultiLineString":
@@ -75,11 +75,11 @@ const MultilineLayer: React.FC<FeaturePopupProps> = ({ feature, selected, icon, 
                 onEachFeature={(f, l) => setSelectedFeature && l.on("click", () => setSelectedFeature(f))} >
                 {popup}
             </GeoJSON>
-            {feature.geometry.coordinates
+            {/* {feature.geometry.coordinates
                 .flatMap((coord, idx) => <MultiPointLayer key={`${feature.properties.id}-${idx}`}
                     selected={selected} setSelectedFeature={setSelectedFeature}
                     popup={popup} feature={multiPoint(coord, feature.properties)} icon={icon} />)
-            }
+            } */}
         </>
         : null
 }
@@ -91,11 +91,11 @@ const LineLayer: React.FC<FeaturePopupProps> = ({ feature, icon, popup, selected
                 onEachFeature={(f, l) => setSelectedFeature && l.on("click", () => setSelectedFeature(f))} >
                 {popup}
             </GeoJSON>
-            {feature.geometry.coordinates
+            {/* {feature.geometry.coordinates
                 .map((coord: Position, idx: number) => <PointLayer key={`${feature.properties.id}-${idx}`}
                     selected={selected} setSelectedFeature={setSelectedFeature}
                     popup={popup} feature={point(coord, feature.properties)} icon={icon} />
-                )}
+                )} */}
         </>
         : null
 }

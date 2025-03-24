@@ -98,8 +98,8 @@ export const LocationDataPanel: React.FC<LocationDataPanelProps> = ({ id, classN
     return feature.properties.areaCode
       ? feature.properties.name
         ? `${feature.properties.name} (${feature.properties.areaCode})` : feature.properties.name
-      : feature.properties.areaCode
-        ? feature.properties.areaCode
+      : feature.properties.name
+        ? feature.properties.name
         : null
   }, [feature])
   return <div id={id} className={cn("w-full flex flex-row justify-between items-center gap-2 p-2 rounded", className)}>

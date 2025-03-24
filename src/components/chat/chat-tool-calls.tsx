@@ -41,7 +41,7 @@ const ToolCallDetailsPanel: React.FC<ToolCallDetailsPanelProps> = ({ id, classNa
     case "locationSelectionTool":
       return <div>
         <ul>
-          {toolParams?.locations.map((l: string) => <li>{l}</li>)
+          {toolParams?.locations.map((l: string) => <li key={l}>{l}</li>)
           }
         </ul>
         <Button type="button" onClick={() => addToolResult({ toolCallId, "result": "roma" })}>Roma</Button>

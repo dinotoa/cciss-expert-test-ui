@@ -64,7 +64,7 @@ const SpeechSynthesisPlayer: React.FC<SpeechSynthesisPlayerProps> = ({ id, class
         utteranceRef.current.onend = null
       }
     }
-  }, [utteranceRef.current])
+  }, [])
 
   // Clean up on unmount
   useEffect(() => {
