@@ -1,6 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button";
 import { MapRectangle } from "@/lib/location-database/geography";
+import { logInfo } from "@/lib/logging";
 import { cn } from "@/lib/utils";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -13,18 +14,22 @@ const outerBounds = new L.LatLngBounds(
   [45, 8],
   ])
 
-const maxBounds = new L.LatLngBounds([
-  [40, 5], [49, 22]
-])
+const icons = new Map<string, L.Icon>();
 
-export function createIcon(path: string, size: number) {
-  const iconSize = size > 10 ? size : 46
-  const icon = L.icon({
-    iconUrl: path,
-    iconSize: [iconSize, iconSize],
-    iconAnchor: [iconSize / 2, iconSize / 2],
-    popupAnchor: [0, -iconSize],
-  })
+export function createIcon(path: string, size: number, selected: boolean = false) {
+  const correctedSize = size > 10 ? size : 40
+  const iconSize = selected ? correctedSize + 8 : correctedSize
+  const iconName = `${path}-${iconSize}-${selected}`
+  logInfo("icon: ", iconName)
+  const icon = icons.has(iconName)
+    ? icons.get(iconName)!
+    : L.icon({
+      iconUrl: path,
+      iconSize: [iconSize, iconSize],
+      iconAnchor: [iconSize / 2, iconSize / 2],
+      popupAnchor: [0, -iconSize],
+      className: selected ? "border-red-500 border-4 bg-red-500 rounded-full" : undefined
+    })
   return icon
 }
 

@@ -1,17 +1,17 @@
-import { Feature, Geometry, Position } from "geojson"
-import React, { } from "react"
-import { GeoJSON, Marker, Popup } from "react-leaflet"
 import { MapRectangle } from "@/lib/location-database/geography"
 import { logWarn } from "@/lib/logging"
+import { point } from "@turf/turf"
+import { Feature, Geometry, Position } from "geojson"
 import { Icon, Layer } from "leaflet"
-import { multiPoint, point } from "@turf/turf"
+import React from "react"
+import { GeoJSON, Marker, Popup } from "react-leaflet"
 
 interface FeatureLayerProps extends React.HTMLProps<HTMLElement> {
     features: Feature<Geometry, any>[]
     selectedFeature?: Feature<Geometry, any>
     setSelectedFeature?: (feature: Feature<Geometry, any>) => void
     setMapMBR: (mbr: MapRectangle) => void
-    createIcon: (feature: Feature<Geometry, any>) => Icon
+    createIcon: (feature: Feature<Geometry, any>, selected: boolean) => Icon
     createPanel: (Feature: Feature<Geometry, any>, setMapMBR: (mbr: MapRectangle) => void) => React.ReactNode
 }
 
@@ -19,28 +19,34 @@ const FeatureLayer: React.FC<FeatureLayerProps> = ({ features, selectedFeature, 
     setMapMBR, createPanel, createIcon }) => {
     return features?.map(feat => {
         const selected = feat.properties.id === selectedFeature?.properties.id
-        const icon = createIcon(feat)
+        const icon = createIcon(feat, false)
+        const selectedIcon = createIcon(feat, true)
         const popup = <Popup>{createPanel(feat, setMapMBR)}</Popup>
         switch (feat.geometry.type) {
             case "Polygon":
             case "MultiPolygon":
-                return <PolygonLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                return <PolygonLayer key={feat.properties.id} feature={feat}
+                    icon={selected ? selectedIcon : icon} popup={popup}
                     selected={selected} setSelectedFeature={setSelectedFeature} />
 
             case "Point":
-                return <PointLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                return <PointLayer key={feat.properties.id} feature={feat}
+                    icon={selected ? selectedIcon : icon} popup={popup}
                     selected={selected} setSelectedFeature={setSelectedFeature} />
 
             case "LineString":
-                return <LineLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                return <LineLayer key={feat.properties.id} feature={feat}
+                    icon={selected ? selectedIcon : icon} popup={popup}
                     selected={selected} setSelectedFeature={setSelectedFeature} />
 
             case "MultiPoint":
-                return <MultiPointLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                return <MultiPointLayer key={feat.properties.id} feature={feat}
+                    icon={selected ? selectedIcon : icon} popup={popup}
                     selected={selected} setSelectedFeature={setSelectedFeature} />
 
             case "MultiLineString":
-                return <MultilineLayer key={feat.properties.id} feature={feat} icon={icon} popup={popup}
+                return <MultilineLayer key={feat.properties.id} feature={feat}
+                    icon={selected ? selectedIcon : icon} popup={popup}
                     selected={selected} setSelectedFeature={setSelectedFeature} />
 
             default:
