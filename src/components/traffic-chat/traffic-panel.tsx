@@ -72,9 +72,9 @@ export function TrafficEventCard({ event, setMapMBR }: TrafficEventCardProps) {
   const bbox = useMemo(() => rectangleXyToLonLat(turf.bbox(event)), [event])
   const [open, setOpen] = useState(false)
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
+    <Collapsible className="w-full" open={open} onOpenChange={setOpen}>
       <div key={event.properties.id} className="relative flex flex-row justify-between items-center w-full p-2">
-        <div className="flex flex-col w-full gap-1">
+        <div className="w-full">
           <div className="font-bold">{event.properties.road}</div>
           <div>Agg.: {new Date(event.properties.updateDate).toLocaleString()}</div>
           <div>{event.properties.description}</div>
@@ -91,8 +91,8 @@ export function TrafficEventCard({ event, setMapMBR }: TrafficEventCardProps) {
         </Button>
       </div >
       {event.properties.note?.length && <CollapsibleTrigger asChild>
-        <div className="flex justify-center items-center w-full p-2">
-          <Button className="self-center" type="button" variant="ghost" size="sm" onClick={() => setOpen(!open)}>
+        <div className="flex justify-center items-center w-full mb-2">
+          <Button className="self-center" type="button" variant="ghost" size="sm">
             {open
               ? <>leggi di meno <ChevronUp /></>
               : <>leggi di più <ChevronDown /></>
