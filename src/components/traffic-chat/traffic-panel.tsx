@@ -1,9 +1,9 @@
 "use client"
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Feature, Geometry } from "geojson";
 import * as turf from "@turf/turf";
-import { ZoomIn } from "lucide-react";
+import { ChevronDown, ChevronUp, ZoomIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import FullScreenPanel from "../tools/fullscreen-panel";
@@ -13,6 +13,7 @@ import { MapRectangle, rectangleXyToLonLat } from "@/lib/location-database/geogr
 import { TrafficDataResponse, TrafficEventType } from "@/lib/traffic-database/traffic-database-types";
 import { fetchTrafficDataById } from "@/lib/traffic-database/traffic-database";
 import LoadingPanel from "../loading-panel";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 
 interface TrafficPanelProps extends React.HTMLProps<HTMLElement> {
   trafficToolResponse: TrafficEventToolResponse
@@ -68,21 +69,39 @@ interface TrafficEventCardProps {
 }
 
 export function TrafficEventCard({ event, setMapMBR }: TrafficEventCardProps) {
-  const bbox = rectangleXyToLonLat(turf.bbox(event))
-
+  const bbox = useMemo(() => rectangleXyToLonLat(turf.bbox(event)), [event])
+  const [open, setOpen] = useState(false)
   return (
-    <div key={event.properties.id} className="relative flex flex-row justify-between items-center w-full p-2">
-      <div>
-        <p className="font-bold">{event.properties.road}</p>
-        <p>Agg.: {new Date(event.properties.updateDate).toLocaleString()}</p>
-        <p>{event.properties.description}</p>
-        <p>{event.properties.location}</p>
-        {event.properties.source && <p className="font-bold">Fonte: {event.properties.source}</p>}
-      </div>
-      <Button variant="ghost" onClick={() => setMapMBR(bbox)}>
-        <ZoomIn />
-      </Button>
-    </div>
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div key={event.properties.id} className="relative flex flex-row justify-between items-center w-full p-2">
+        <div className="flex flex-col w-full gap-1">
+          <div className="font-bold">{event.properties.road}</div>
+          <div>Agg.: {new Date(event.properties.updateDate).toLocaleString()}</div>
+          <div>{event.properties.description}</div>
+          <div>{event.properties.location}</div>
+          {event.properties.source && <div className="font-bold">Fonte: {event.properties.source}</div>}
+          {event.properties.note?.length && <>
+            <CollapsibleContent>
+              <div>{event.properties.note}</div>
+            </CollapsibleContent>
+          </>}
+        </div>
+        <Button variant="ghost" onClick={() => setMapMBR(bbox)}>
+          <ZoomIn />
+        </Button>
+      </div >
+      {event.properties.note?.length && <CollapsibleTrigger asChild>
+        <div className="flex justify-center items-center w-full p-2">
+          <Button className="self-center" type="button" variant="ghost" size="sm" onClick={() => setOpen(!open)}>
+            {open
+              ? <>leggi di meno <ChevronUp /></>
+              : <>leggi di più <ChevronDown /></>
+            }
+          </Button>
+        </div>
+      </CollapsibleTrigger>
+      }
+    </Collapsible>
   )
 }
 

@@ -20,7 +20,6 @@ export function createIcon(path: string, size: number, selected: boolean = false
   const correctedSize = size > 10 ? size : 40
   const iconSize = selected ? correctedSize + 8 : correctedSize
   const iconName = `${path}-${iconSize}-${selected}`
-  logInfo("icon: ", iconName)
   const icon = icons.has(iconName)
     ? icons.get(iconName)!
     : L.icon({
