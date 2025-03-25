@@ -70,23 +70,22 @@ function SelectableList({
     createItemPanel
 }: SelectableListProps) {
     const [focusedIndex, setFocusedIndex] = React.useState<number>(-1)
-
-    useEffect(() => {
-        if (selectedItem) {
-            const idx = items.findIndex((item) => getItemKey(item) === getItemKey(selectedItem))
-            if (idx >= 0) {
-                setFocusedIndex(idx)
-            }
-        }
-    }, [selectedItem, items, getItemKey])
-
-    useEffect(() => {
-        if (focusedIndex >= 0) {
-            const elementKey = getItemKey(items[focusedIndex])
+    const changeFocusedIndex = (index: number) => {
+        setFocusedIndex(index)
+        const item = items[index]
+        if (item) {
+            const elementKey = getItemKey(item)
             const selectedElement = window.document.getElementById(elementKey);
             selectedElement?.scrollIntoView({ behavior: 'auto', block: 'nearest' });
         }
-    }, [focusedIndex, items, getItemKey]);
+    }
+    const changeSelectedIndex = (itemIdx: number) => {
+        const item = items[itemIdx]
+        if (item) {
+            setSelectedItem(item)
+            changeFocusedIndex(itemIdx)
+        }
+    }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         const itemCount = items.length
@@ -94,15 +93,15 @@ function SelectableList({
         switch (e.key) {
             case "ArrowDown":
                 e.preventDefault()
-                setFocusedIndex((prev) => Math.min(prev + 1, itemCount - 1))
+                changeFocusedIndex(Math.min(focusedIndex + 1, itemCount - 1))
                 break
             case "ArrowUp":
                 e.preventDefault()
-                setFocusedIndex((prev) => Math.max(prev - 1, 0))
+                changeFocusedIndex(Math.max(focusedIndex - 1, 0))
                 break
             case "Home":
                 e.preventDefault()
-                setFocusedIndex(0)
+                changeFocusedIndex(0)
                 break
             case "End":
                 e.preventDefault()
@@ -111,9 +110,7 @@ function SelectableList({
             case "Enter":
             case " ": // Space
                 e.preventDefault()
-                if (focusedIndex >= 0) {
-                    setSelectedItem(items[focusedIndex])
-                }
+                changeSelectedIndex(focusedIndex)
                 break
         }
     }
@@ -146,15 +143,16 @@ function SelectableList({
                             data-focused={isFocused}
                             data-selected={isSelected}
                             className={cn(
-                                "flex cursor-pointer items-center justify-between rounded-sm text-sm transition-colors",
-                                index !== items.length - 1 && "border-b ",
+                                "flex flex-col cursor-pointer items-center justify-between rounded-md text-sm transition-colors",
                                 isSelected && "bg-primary text-primary-foreground",
                                 !isSelected && isFocused && "bg-accent text-accent-foreground",
-                                !isSelected && !isFocused && "hover:bg-accent hover:text-accent-foreground"
+                                !isSelected && !isFocused && "hover:bg-accent hover:text-accent-foreground",
+                                isFocused && "border border-primary"
                             )}
-                            onClick={() => setSelectedItem(items[index])}
+                            onClick={() => changeSelectedIndex(index)}
                         >
                             {createItemPanel(item)}
+                            { index < items.length - 1 && <hr className="w-full" />}
                         </li>
                     )
                 })}
