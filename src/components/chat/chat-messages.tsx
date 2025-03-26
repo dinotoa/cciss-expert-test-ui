@@ -18,7 +18,6 @@ const ChatMessagePanel: React.FC<ChatProps> = ({ id = "chat-message-panel", clas
   const deleteMessage = (index: number) => {
     setMessages(messages.filter((_, idx) => (idx !== index) && (idx !== index - 1)));
   }
-  const clipboard = typeof window !== 'undefined' ? navigator.clipboard : undefined;
   const lastElementRef = useRef<HTMLLIElement>(null);
   useEffect(() => {
     if (lastElementRef.current) {
@@ -36,6 +35,7 @@ const ChatMessagePanel: React.FC<ChatProps> = ({ id = "chat-message-panel", clas
           </li>
         ))}
       </ul>
+      <div id="last-scroll-area-element"/>
     </ScrollArea>
   )
 }

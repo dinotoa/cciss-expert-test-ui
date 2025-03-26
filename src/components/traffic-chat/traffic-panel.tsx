@@ -86,7 +86,7 @@ export function TrafficEventCard({ event, setMapMBR }: TrafficEventCardProps) {
             </CollapsibleContent>
           </>}
         </div>
-        <Button variant="ghost" onClick={() => setMapMBR(bbox)}>
+        <Button variant="ghost" size="icon" className="hover:border hover:border-primary" onClick={() => setMapMBR(bbox)}>
           <ZoomIn />
         </Button>
       </div >
