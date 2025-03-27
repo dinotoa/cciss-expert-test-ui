@@ -6,13 +6,13 @@ import * as turf from "@turf/turf";
 import { ChevronDown, ChevronUp, ZoomIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import FullScreenPanel from "../tools/fullscreen-panel";
-import SearchableListPanel from "../tools/searchable-list";
+import FullScreenPanel from "../utils/fullscreen-panel";
+import SearchableListPanel from "../utils/searchable-list";
 import { TrafficEventToolResponse } from "@/ai/traffic-agent/traffic-tools";
 import { MapRectangle, rectangleXyToLonLat } from "@/lib/location-database/geography";
 import { TrafficDataResponse, TrafficEventType } from "@/lib/traffic-database/traffic-database-types";
 import { fetchTrafficDataById } from "@/lib/traffic-database/traffic-database";
-import LoadingPanel from "../loading-panel";
+import LoadingPanel from "../utils/loading-panel";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 
 interface TrafficPanelProps extends React.HTMLProps<HTMLElement> {

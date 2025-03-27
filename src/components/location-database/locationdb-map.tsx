@@ -7,7 +7,7 @@ import { LocationDataPanel } from "./locationdb-panel"
 
 interface LocationDbProps extends React.HTMLProps<HTMLElement> {
   features?: LDbFeature[]
-  selectedFeature?: LDbFeature
+  selectedFeature: LDbFeature | null
   setSelectedFeature?: (f: LDbFeature) => void
   fullMBR?: MapRectangle
   desiredMBR?: MapRectangle

@@ -7,7 +7,7 @@ import { Loader2, Send, Trash2 } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import ChatSuggestionPanel, { ChatSuggestionType } from "./chat-suggestion";
 import ChatHistoryPanel from "./chat-history";
-import { useLocalStorageStack } from "@/hooks/local-storage";
+import { useLocalStorageStack } from "@/hooks/use-local-storage";
 
 type ChatInputProps = React.HTMLProps<HTMLElement> & {
   isLoading: boolean

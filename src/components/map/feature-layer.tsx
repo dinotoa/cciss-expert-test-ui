@@ -8,7 +8,7 @@ import { GeoJSON, Marker, Popup } from "react-leaflet"
 
 interface FeatureLayerProps extends React.HTMLProps<HTMLElement> {
     features: Feature<Geometry, any>[]
-    selectedFeature?: Feature<Geometry, any>
+    selectedFeature?: Feature<Geometry, any> | null
     setSelectedFeature?: (feature: Feature<Geometry, any>) => void
     setMapMBR: (mbr: MapRectangle) => void
     createIcon: (feature: Feature<Geometry, any>, selected: boolean) => Icon

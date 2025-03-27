@@ -9,9 +9,9 @@ import * as turf from "@turf/turf"
 import { ZoomIn } from "lucide-react"
 import dynamic from "next/dynamic"
 import React, { useCallback, useEffect, useMemo, useState } from "react"
-import LoadingPanel from "../loading-panel"
-import FullScreenPanel from "../tools/fullscreen-panel"
-import SearchableListPanel from "../tools/searchable-list"
+import LoadingPanel from "../utils/loading-panel"
+import FullScreenPanel from "../utils/fullscreen-panel"
+import SearchableListPanel from "../utils/searchable-list"
 import { Button } from "../ui/button"
 
 interface LocationDatabasePanelProps extends React.HTMLProps<HTMLElement> {
@@ -31,7 +31,7 @@ const LocationDatabasePanel: React.FC<LocationDatabasePanelProps> = ({ id = "loc
   const [searchTerm, setSearchTerm] = useState("")
   const [features, setFeatures] = useState<LDbFeature[]>()
   const [mapMBR, setMapMBR] = useState<MapRectangle>()
-  const [selectedItem, setSelectedItem] = useState<LDbFeature>()
+  const [selectedItem, setSelectedItem] = useState<LDbFeature | null>(null)
   const selectFeature = useCallback((feature: LDbFeature) => {
     setSelectedItem(feature)
     if (feature) {
@@ -57,10 +57,10 @@ const LocationDatabasePanel: React.FC<LocationDatabasePanelProps> = ({ id = "loc
       <section id={`${id}__container`} className={"relative w-full h-full flex flex-row justify-between items-start gap-1 border"}>
         {features === undefined
           ? <LoadingPanel message="Caricamento dati..." />
-          : <SearchableListPanel id={`${id}__search`} className="w-[30%] h-full p-1"
-            searchTerm={searchTerm} setSearchTerm={setSearchTerm} getItemKey={(item) => item?.properties?.id.toString()}
-            items={filteredLocations} setSelectedItem={selectFeature} selectedItem={selectedItem}
-            createItemPanel={createItemPanel} />
+          : <SearchableListPanel<LDbFeature> id={`${id}__search`} className="w-[30%] h-full p-1"
+            searchTerm={searchTerm} setSearchTerm={setSearchTerm} getElementKey={(item) => item?.properties?.id.toString()}
+            items={filteredLocations} onSelectionChange={selectFeature} selectedElement={selectedItem}
+            createElementPanel={createItemPanel} />
         }
         <MapPanel id={`${id}__map`} className="w-[70%] h-full"
           features={filteredLocations} selectedFeature={selectedItem} setSelectedFeature={selectFeature}
