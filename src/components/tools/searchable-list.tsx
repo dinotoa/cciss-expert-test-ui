@@ -1,7 +1,7 @@
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { Search, X } from "lucide-react"
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 
@@ -70,14 +70,16 @@ function SelectableList({
     createItemPanel
 }: SelectableListProps) {
     const [focusedIndex, setFocusedIndex] = React.useState<number>(-1)
+    const focusedElementRef = useRef<any>(null)
+    
     const changeFocusedIndex = (index: number) => {
         setFocusedIndex(index)
-        const item = items[index]
-        if (item) {
-            const elementKey = getItemKey(item)
-            const selectedElement = window.document.getElementById(elementKey);
-            selectedElement?.scrollIntoView({ behavior: 'auto', block: 'nearest' });
-        }
+        // const item = items[index]
+        // if (item) {
+        //     const elementKey = getItemKey(item)
+        //     const selectedElement = window.document.getElementById(elementKey);
+        //     selectedElement?.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+        // }
     }
     const changeSelectedIndex = (itemIdx: number) => {
         const item = items[itemIdx]
@@ -87,6 +89,11 @@ function SelectableList({
         }
     }
 
+    useEffect(() => {
+        if (focusedElementRef.current) {
+            focusedElementRef.current.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+        }
+    }, [focusedElementRef.current])
     const handleKeyDown = (e: React.KeyboardEvent) => {
         const itemCount = items.length
 
@@ -137,6 +144,7 @@ function SelectableList({
                     return (
                         <li
                             key={index}
+                            ref={isFocused ? focusedElementRef : undefined}
                             id={`${key}`}
                             role="option"
                             aria-selected={isSelected}

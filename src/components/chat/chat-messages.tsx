@@ -3,6 +3,7 @@ import { Message } from "ai/react"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import ChatResponsePanel from "@/components/chat/chat-response"
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom"
 
 type ChatProps = React.HTMLProps<HTMLElement> & {
   isLoading: boolean,
@@ -18,24 +19,21 @@ const ChatMessagePanel: React.FC<ChatProps> = ({ id = "chat-message-panel", clas
   const deleteMessage = (index: number) => {
     setMessages(messages.filter((_, idx) => (idx !== index) && (idx !== index - 1)));
   }
-  const lastElementRef = useRef<HTMLLIElement>(null);
-  useEffect(() => {
-    if (lastElementRef.current) {
-      lastElementRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]); // Add messages as a dependency
+  const [messagesContainerRef, messagesEndRef] =
+    useScrollToBottom<HTMLUListElement, HTMLDivElement>();
+  const lastElementRef = useRef<HTMLDivElement>(null);
   return (
     <ScrollArea id={id} autoFocus={true} className={cn("flex flex-col gap-2 w-full h-full overflow-y-auto p-2 rounded", className)}>
-      <ul>
+      <ul ref={messagesContainerRef}>
         {messages.map((message, index) => (
-          <li key={message.id} id={message.id} ref={index === messages.length - 1 ? lastElementRef : undefined}>
+          <li key={message.id} id={message.id}>
             <ChatResponsePanel message={message} isLoading={isLoading && index === messages.length - 1}
               deleteMessage={() => deleteMessage(index)} addToolResult={addToolResult} />
             <hr className="w-full pb-3" />
           </li>
         ))}
       </ul>
-      <div id="last-scroll-area-element"/>
+      <div id="last-scroll-area-element" ref={messagesEndRef}/>
     </ScrollArea>
   )
 }
