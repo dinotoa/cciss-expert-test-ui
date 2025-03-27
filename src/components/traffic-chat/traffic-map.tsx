@@ -8,7 +8,7 @@ import { TrafficEventCard } from "./traffic-panel"
 
 interface TrafficMapProps extends React.HTMLProps<HTMLElement> {
   events?: FeatureCollection<Geometry, TrafficEventType>
-  selectedFeature?: Feature<Geometry, TrafficEventType>
+  selectedFeature?: Feature<Geometry, TrafficEventType> | null
   setSelectedFeature?: (feature: Feature<Geometry, TrafficEventType>) => void
   className?: string
   iconUrl: string

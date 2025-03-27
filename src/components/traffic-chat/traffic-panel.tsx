@@ -36,7 +36,7 @@ const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, traffic
   }, [loadEvents])
 
   const [eventData, setEventData] = useState<TrafficDataResponse>()
-  const [selectedItem, setSelectedItem] = useState<Feature<Geometry, TrafficEventType>>()
+  const [selectedItem, setSelectedItem] = useState<Feature<Geometry, TrafficEventType> | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const filteredEvents = eventData?.data?.features.length ?
     turf.featureCollection(eventData?.data?.features?.filter(e => filterEvent(searchTerm, e)))
@@ -50,10 +50,10 @@ const TrafficEventPanel: React.FC<TrafficPanelProps> = ({ id, className, traffic
       <section id={`${id}__container`} className={"relative w-full h-full flex flex-row justify-between items-start gap-1 border"}>
         {eventData === undefined
           ? <LoadingPanel message="Caricamento dati..." />
-          : <SearchableListPanel id={`${id}__search`} className="w-[30%] h-full p-1"
-            searchTerm={searchTerm} setSearchTerm={setSearchTerm} getItemKey={(item) => item?.properties?.id}
-            items={filteredEvents?.features ?? []} selectedItem={selectedItem} setSelectedItem={setSelectedItem}
-            createItemPanel={createItemPanel} />
+          : <SearchableListPanel<Feature<Geometry, TrafficEventType>> id={`${id}__search`} className="w-[30%] h-full p-1"
+            searchTerm={searchTerm} setSearchTerm={setSearchTerm} getElementKey={(item) => item?.properties?.id}
+            items={filteredEvents?.features ?? []} selectedElement={selectedItem} onSelectionChange={setSelectedItem}
+            createElementPanel={createItemPanel} />
         }
         <MapPanel className="w-[70%] h-full" desiredMBR={mapMBR} setMapMBR={setMapMBR} fullMBR={fullMbr}
           events={filteredEvents} selectedFeature={selectedItem} setSelectedFeature={setSelectedItem}
